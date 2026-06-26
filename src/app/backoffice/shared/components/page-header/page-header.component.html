@@ -1,0 +1,28 @@
+<div class="page-header">
+  @if (breadcrumbs().length) {
+    <nav class="page-header__breadcrumb" aria-label="Ruta de navegación">
+      @for (crumb of breadcrumbs(); track crumb.label; let last = $last) {
+        @if (last) {
+          <span class="page-header__crumb page-header__crumb--active">{{ crumb.label }}</span>
+        } @else {
+          <span class="page-header__crumb">{{ crumb.label }}</span>
+          <span class="page-header__crumb-sep" aria-hidden="true">›</span>
+        }
+      }
+    </nav>
+  }
+
+  <div class="page-header__body">
+    <div class="page-header__text">
+      <h1 class="page-header__title">{{ title() }}</h1>
+      @if (description()) {
+        <p class="page-header__description">{{ description() }}</p>
+      }
+    </div>
+
+    <!-- Slot para botones de acción vía ng-content -->
+    <div class="page-header__actions">
+      <ng-content />
+    </div>
+  </div>
+</div>

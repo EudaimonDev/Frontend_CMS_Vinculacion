@@ -1,0 +1,61 @@
+<div class="media-card"
+     [class.selected]="media.selectedItem()?.id === item().id"
+     (click)="select()"
+     role="button"
+     tabindex="0"
+     (keydown.enter)="select()">
+
+  <!-- Thumbnail -->
+  <div class="mc-thumb">
+
+    @switch (item().type) {
+      @case ('image') {
+        <img [src]="item().url" [alt]="item().name" loading="lazy" />
+      }
+      @case ('svg') {
+        <img [src]="item().url" [alt]="item().name" />
+      }
+      @case ('video') {
+        <!-- Placeholder para video -->
+        <div class="mc-thumb__placeholder mc-thumb__placeholder--video">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+        </div>
+      }
+      @default {
+        <div class="mc-thumb__placeholder">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </div>
+      }
+    }
+
+    <!-- Badge de tipo -->
+    <span class="mc-badge mc-badge--{{ item().type }}">{{ typeLabel }}</span>
+
+    <!-- Acciones al hover -->
+    <div class="mc-actions">
+      <button class="mc-action mc-action--delete"
+              title="Eliminar"
+              (click)="delete($event)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14H6L5 6"/>
+          <path d="M10 11v6M14 11v6"/>
+          <path d="M9 6V4h6v2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Metadata -->
+  <div class="mc-info">
+    <p class="mc-info__name" [title]="item().name">{{ item().name }}</p>
+    <span class="mc-info__size">{{ readableSize }}</span>
+  </div>
+
+</div>

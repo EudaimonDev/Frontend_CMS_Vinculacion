@@ -1,0 +1,37 @@
+@switch (block.type) {
+
+  @case ('hero') {
+    <app-hero-block [data]="heroData" />
+  }
+
+  @case ('cards-grid') {
+    <app-cards-grid [data]="cardsData" />
+  }
+
+  @case ('gallery-grid') {
+    <app-gallery-grid [data]="galleryData" />
+  }
+
+  @case ('video') {
+    <div class="video-block">
+      @if (videoUrl) {
+        <div class="video-block__wrapper">
+          <iframe
+            [src]="videoUrl"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+        </div>
+      }
+      @if (videoTitle) {
+        <h3 class="video-block__title">{{ videoTitle }}</h3>
+      }
+    </div>
+  }
+
+  @default {
+    <div class="block-unknown">Bloque desconocido: {{ block.type }}</div>
+  }
+
+}

@@ -1,0 +1,14 @@
+<article class="card" [routerLink]="['/articulo', article.id]" [ngClass]="article.category">
+  <div class="card-img">
+    <span>{{ article.emoji }}</span>
+  </div>
+  <div class="card-body">
+    <app-category-badge [category]="article.category" />
+    <p class="card-title">{{ article.title }}</p>
+    <div class="card-meta">
+      <span>{{ article.date }}</span>
+      <span class="dot"></span>
+      <span>{{ article.readingTime | readingTime }}</span>
+    </div>
+  </div>
+</article>

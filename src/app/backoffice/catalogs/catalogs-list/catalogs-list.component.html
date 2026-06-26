@@ -1,0 +1,190 @@
+<app-page-header
+  title="Catálogos"
+  description="Administra colecciones, taxonomías e ítems reutilizables del portal."
+  [breadcrumbs]="[{ label: 'Inicio', route: '/admin/dashboard' }, { label: 'Catálogos' }]"
+>
+  <a routerLink="/admin/catalogs/new" class="btn btn--primary">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+    >
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+    Nuevo catálogo
+  </a>
+</app-page-header>
+
+<section class="metrics-grid">
+  <article class="metric-card metric-card--blue">
+    <span class="metric-card__label">Catálogos registrados</span>
+    <strong class="metric-card__value">{{ metrics().totalCatalogs }}</strong>
+    <span class="metric-card__hint">Base editorial total</span>
+  </article>
+
+  <article class="metric-card metric-card--teal">
+    <span class="metric-card__label">Catálogos activos</span>
+    <strong class="metric-card__value">{{ metrics().activeCatalogs }}</strong>
+    <span class="metric-card__hint">Disponibles para operación</span>
+  </article>
+
+  <article class="metric-card metric-card--sand">
+    <span class="metric-card__label">Artículos vinculados</span>
+    <strong class="metric-card__value">{{ metrics().totalItems }}</strong>
+    <span class="metric-card__hint">Entradas totales en catálogos</span>
+  </article>
+
+</section>
+
+<div class="toolbar">
+  <div class="search-box">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Buscar por nombre, slug o descripción..."
+      [value]="searchQuery()"
+      (input)="searchQuery.set($any($event.target).value)"
+    />
+  </div>
+
+  <div class="filters" aria-label="Filtros por estado">
+    @for (filter of filterOptions(); track filter.value) {
+      <button
+        type="button"
+        class="filter-chip"
+        [class.filter-chip--active]="statusFilter() === filter.value"
+        (click)="selectFilter(filter.value)"
+      >
+        {{ filter.label }}
+        <span>{{ filter.count }}</span>
+      </button>
+    }
+  </div>
+</div>
+
+<div class="table-card">
+  @if (filteredCatalogs().length === 0) {
+    <div class="table-empty">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="42"
+        height="42"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.4"
+      >
+        <line x1="8" y1="6" x2="21" y2="6" />
+        <line x1="8" y1="12" x2="21" y2="12" />
+        <line x1="8" y1="18" x2="21" y2="18" />
+        <circle cx="3.5" cy="6" r="1" />
+        <circle cx="3.5" cy="12" r="1" />
+        <circle cx="3.5" cy="18" r="1" />
+      </svg>
+      <p>No hay catálogos que coincidan con los filtros actuales.</p>
+    </div>
+  } @else {
+    <div class="table-shell">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Catálogo</th>
+            <th>Estado</th>
+            <th>Visibilidad</th>
+
+            <th>Actualizado</th>
+            <th class="table__th--actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (catalog of filteredCatalogs(); track catalog.id) {
+            <tr class="table__row">
+              <td class="table__catalog">
+                <div class="catalog-cell">
+                  <div class="catalog-cell__topline">
+                    <span class="catalog-cell__name">{{ catalog.name }}</span>
+                    <span class="theme-pill theme-pill--{{ catalog.theme }}">
+                      {{ themeLabel(catalog.theme) }}
+                    </span>
+                  </div>
+                  <p class="catalog-cell__description">{{ catalog.description }}</p>
+                  <div class="catalog-cell__meta">
+                    <code class="slug-chip">{{ catalog.slug }}</code>
+                    <span class="catalog-cell__items">{{ itemLabel(catalog) }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <app-status-badge [status]="catalog.status" />
+              </td>
+              <td>
+                <span class="visibility-pill visibility-pill--{{ catalog.visibility }}">
+                  {{ visibilityLabel(catalog.visibility) }}
+                </span>
+              </td>
+
+              <td class="table__date">{{ catalog.updatedAt | date:'dd/MM/yyyy' }}</td>
+              <td class="table__actions">
+                <div class="actions">
+                  <a
+                    [routerLink]="['/admin/catalogs', catalog.id, 'edit']"
+                    class="action-btn action-btn--edit"
+                    title="Editar catálogo"
+                  >
+                    Editar
+                  </a>
+                  <button
+                    type="button"
+                    class="action-btn action-btn--ghost"
+                    title="Duplicar catálogo"
+                    (click)="duplicateCatalog(catalog)"
+                  >
+                    Duplicar
+                  </button>
+                  <button
+                    type="button"
+                    class="action-btn action-btn--delete"
+                    title="Eliminar catálogo"
+                    (click)="confirmDelete(catalog)"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+@if (catalogToDelete()) {
+  <app-modal
+    title="Eliminar catálogo"
+    [description]="'¿Seguro que deseas eliminar «' + catalogToDelete()!.name + '»? También se eliminarán sus ítems asociados.'"
+    confirmLabel="Sí, eliminar"
+    cancelLabel="Cancelar"
+    variant="danger"
+    [loading]="deleteLoading()"
+    (confirmed)="deleteCatalog()"
+    (cancelled)="cancelDelete()"
+  />
+}

@@ -1,0 +1,39 @@
+<div class="modal-overlay" (click)="cancelled.emit()" role="dialog" aria-modal="true">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal__header">
+      <h3 class="modal__title">{{ title() }}</h3>
+      <button class="modal__close" (click)="cancelled.emit()" aria-label="Cerrar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    @if (description()) {
+      <p class="modal__description">{{ description() }}</p>
+    }
+
+    <!-- Slot para contenido personalizado -->
+    <div class="modal__body">
+      <ng-content />
+    </div>
+
+    <div class="modal__footer">
+      <button class="modal__btn modal__btn--cancel" (click)="cancelled.emit()" [disabled]="loading()">
+        {{ cancelLabel() }}
+      </button>
+      <button
+        class="modal__btn modal__btn--confirm modal__btn--{{ variant() }}"
+        (click)="confirmed.emit()"
+        [disabled]="loading()"
+      >
+        @if (loading()) {
+          <span class="modal__spinner"></span>
+        }
+        {{ confirmLabel() }}
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,41 @@
+.main-content {
+  background: #f0f4f8;
+}
+
+.footer {
+  background: #1a1a2e;
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  p {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+  }
+
+  .footer-logo { /* Imagen del Logo */
+    opacity: .4;
+    transition: var(--filter-logo-transition-out);
+
+    &:hover{
+      opacity: 1;
+      filter: var(--filter-logo-hover);
+      transition: var(--filter-logo-transition-in);
+    }
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 16px;
+
+    a {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+
+      &:hover { color: rgba(255, 255, 255, 0.7); }
+    }
+  }
+}

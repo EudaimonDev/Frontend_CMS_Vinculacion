@@ -1,0 +1,60 @@
+<header class="header">
+
+  <!-- Botón toggle sidebar / hamburger -->
+  <button class="header__toggle" (click)="toggleSidebar.emit()" aria-label="Alternar menú">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="6"  x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+
+  <!-- Título de la página actual -->
+  <h2 class="header__title">{{ pageTitle() }}</h2>
+
+  <!-- Acciones del lado derecho -->
+  <div class="header__actions">
+
+    <!-- Notificaciones -->
+    <button class="header__icon-btn" aria-label="Notificaciones">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+    </button>
+
+    <!-- Avatar / menú de usuario -->
+    <div class="user-menu">
+      <button class="user-menu__trigger" (click)="toggleUserMenu()" [attr.aria-expanded]="userMenuOpen()">
+        <div class="user-menu__avatar">{{ getUserInitials() }}</div>
+        @if (currentUser()) {
+          <span class="user-menu__name">{{ currentUser()!.name }}</span>
+        }
+        <svg class="user-menu__chevron" [class.user-menu__chevron--open]="userMenuOpen()"
+          xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+
+      @if (userMenuOpen()) {
+        <div class="user-menu__dropdown">
+          @if (currentUser()) {
+            <div class="user-menu__info">
+              <strong>{{ currentUser()!.name }}</strong>
+              <span>{{ currentUser()!.email }}</span>
+            </div>
+            <hr class="user-menu__divider"/>
+          }
+          <button class="user-menu__item" (click)="logout()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Cerrar sesión
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+
+</header>

@@ -1,0 +1,19 @@
+<div class="gate-wrapper">
+  <!-- Orbs decorativos de fondo -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Card central -->
+  <div class="gate-card">
+    <div class="gate-card__form">
+      <app-register-form (registered)="onRegistered()" />
+    </div>
+    <div class="gate-card__image">
+      <img src="images/obstetricia.png" alt="Obstetricia" />
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <p class="gate-footer">© {{ currentYear }} Universidad de Guayaquil · UG Wiki</p>
+</div>

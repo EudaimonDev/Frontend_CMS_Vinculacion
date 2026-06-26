@@ -1,0 +1,56 @@
+@if (isVisible) {
+  <div class="ug-contact-overlay" (click)="close()">
+    <div class="contacto-card" (click)="$event.stopPropagation()">
+      <div class="card-glow"></div>
+
+      <button class="btn-close-modal" (click)="close()">×</button>
+
+      <div class="card-header">
+        <div class="icon-box">
+          <i class="bi bi-heart-pulse-fill"></i>
+        </div>
+        <div class="title-group">
+          <span class="subtitle">{{ facultad | uppercase }}</span>
+          <h2>UG Wiki: {{ carrera }}</h2>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <p class="description">
+          Si tienes problemas con el acceso al material de Obstetricia o necesitas reportar un error
+          en el CMS:
+        </p>
+
+        <div class="contact-list">
+          <div class="contact-item">
+            <div class="item-icon"><i class="bi bi-envelope-heart"></i></div>
+            <div class="item-content">
+              <label>Secretaría Académica</label>
+              <span>obstetricia.info@ug.edu.ec</span>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <div class="item-icon"><i class="bi bi-headset"></i></div>
+            <div class="item-content">
+              <label>Soporte Wiki Visual</label>
+              <span>soporte.cms@ug.edu.ec</span>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <div class="item-icon"><i class="bi bi-geo-alt-fill"></i></div>
+            <div class="item-content">
+              <label>Ubicación Física</label>
+              <span>Facultad de Ciencias Médicas, Planta Baja.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <button class="btn-action" (click)="close()">Entendido</button>
+      </div>
+    </div>
+  </div>
+}

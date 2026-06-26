@@ -1,0 +1,16 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--radius-xl, 999px);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+
+  &--published { background: #dcfce7; color: #15803d; border-color: #15803d; }
+  &--draft     { background: #fef9c3; color: #a16207; border-color: #a16207; }
+  &--archived  { background: #f1f5f9; color: #64748b; border-color: #64748b; }
+  &--active    { background: #dbeafe; color: #1d4ed8; border-color: #1d4ed8; }
+  &--inactive  { background: #fee2e2; color: #dc2626; border-color: #dc2626; }
+}

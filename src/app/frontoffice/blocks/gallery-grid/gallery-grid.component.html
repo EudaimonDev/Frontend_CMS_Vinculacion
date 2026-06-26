@@ -1,0 +1,28 @@
+<section class="gallery-section">
+  <div class="section-header">
+    <h2>{{ data.title }}</h2>
+    <a class="see-all" routerLink="/explorar-galeria">Explorar →</a>
+  </div>
+
+  <div class="gallery-grid">
+    @for (cat of categories(); track cat.categoryId; let i = $index) {
+      <div class="gallery-card"
+           [style.background]="cat.imageUrl ? 'none' : getGradient(i)"
+           [style.position]="'relative'"
+           [style.overflow]="'hidden'"
+           [routerLink]="['/categoria', cat.slug]">
+        @if (cat.imageUrl) {
+          <img [src]="cat.imageUrl" [alt]="cat.name"
+            style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0" />
+          <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:1"></div>
+        }
+        <div style="position:relative;z-index:2">
+          @if (!cat.imageUrl) {
+            <span class="gallery-emoji">{{ getIcon(i) }}</span>
+          }
+          <span class="gallery-label">{{ cat.name }}</span>
+        </div>
+      </div>
+    }
+  </div>
+</section>

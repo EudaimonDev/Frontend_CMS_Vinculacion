@@ -1,0 +1,5 @@
+<div class="media-grid">
+  @for (item of media.filteredItems(); track item.id) {
+    <app-media-card [item]="item" />
+  }
+</div>

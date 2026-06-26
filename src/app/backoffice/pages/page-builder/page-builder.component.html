@@ -1,0 +1,519 @@
+<div class="builder">
+  <!-- ══════════════════════ TOPBAR ══════════════════════ -->
+  <header class="builder-topbar">
+    <div class="builder-topbar__left">
+      <a [routerLink]="['/admin/pages']" class="back-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </a>
+      <div class="builder-topbar__title">
+        <span class="builder-topbar__label">Editor visual</span>
+        <span class="builder-topbar__page">{{ pageTitle() }}</span>
+      </div>
+    </div>
+
+    <div class="device-toggle">
+      @for (d of ['desktop', 'tablet', 'mobile']; track d) {
+        <button class="device-btn" [class.device-btn--active]="device() === d" (click)="device.set($any(d))">
+          @switch (d) {
+            @case ('desktop') {
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" />
+              </svg>
+            }
+            @case ('tablet') {
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="4" y="2" width="16" height="20" rx="2" /><line x1="12" y1="18" x2="12.01" y2="18" />
+              </svg>
+            }
+            @case ('mobile') {
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="5" y="2" width="14" height="20" rx="2" /><line x1="12" y1="18" x2="12.01" y2="18" />
+              </svg>
+            }
+          }
+        </button>
+      }
+    </div>
+
+    <div class="builder-topbar__right">
+      @if (saved()) {
+        <span class="saved-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Guardado
+        </span>
+      }
+      <span class="blocks-counter">{{ blocks().length }} bloque{{ blocks().length !== 1 ? 's' : '' }}</span>
+      <button class="btn btn--primary" (click)="save()" [disabled]="saving()">
+        @if (saving()) {
+          <span class="spinner"></span>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" />
+          </svg>
+        }
+        Guardar
+      </button>
+    </div>
+  </header>
+
+  <!-- ══════════════════════ BODY ══════════════════════ -->
+  <div class="builder-body">
+
+    <!-- ── Panel izquierdo: paleta ── -->
+    <aside class="builder-palette">
+      <p class="builder-palette__label">Bloques</p>
+      <div class="builder-palette__items">
+        @for (item of palette; track item.type) {
+          <button class="palette-item" (click)="addBlock(item.type)">
+            <span class="palette-item__icon">
+              @switch (item.icon) {
+                @case ('hero') {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 10 5-3 4 4 3-2 6 4" />
+                  </svg>
+                }
+                @case ('text') {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <line x1="17" y1="10" x2="3" y2="10" /><line x1="21" y1="6" x2="3" y2="6" />
+                    <line x1="21" y1="14" x2="3" y2="14" /><line x1="17" y1="18" x2="3" y2="18" />
+                  </svg>
+                }
+                @case ('image') {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" />
+                  </svg>
+                }
+                @case ('cards') {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="2" y="5" width="9" height="14" rx="1" /><rect x="13" y="5" width="9" height="14" rx="1" />
+                  </svg>
+                }
+                @case ('cta') {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="2" y="8" width="20" height="8" rx="4" /><line x1="8" y1="12" x2="16" y2="12" />
+                  </svg>
+                }
+                @case ('video') {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="2" y="6" width="20" height="12" rx="2" /><polygon points="10 9 15 12 10 15" fill="currentColor" stroke="none" />
+                  </svg>
+                }
+              }
+            </span>
+            <span class="palette-item__label">{{ item.label }}</span>
+            <svg class="palette-item__add" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+        }
+      </div>
+
+      <div class="builder-palette__config">
+        <p class="builder-palette__label">Configuración</p>
+        <label class="config-field">
+          <span class="config-field__label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            Tiempo de lectura
+          </span>
+          <div class="config-field__input-wrap">
+            <input
+              type="number"
+              class="config-field__input"
+              min="1"
+              max="999"
+              [ngModel]="readingTime()"
+              (ngModelChange)="onReadingTimeChange($event)"
+            />
+            <span class="config-field__suffix">min</span>
+          </div>
+        </label>
+      </div>
+    </aside>
+
+    <!-- ── Canvas central ── -->
+    <main class="builder-canvas-wrapper" (click)="deselect()">
+      <div class="builder-canvas" [class]="'builder-canvas--' + device()">
+        @if (blocks().length === 0) {
+          <div class="canvas-empty">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+              <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
+            </svg>
+            <p>Sin bloques. Agrega uno desde el panel izquierdo.</p>
+          </div>
+        }
+
+        <div cdkDropList [cdkDropListData]="blocks()" (cdkDropListDropped)="onDrop($event)" class="drop-list">
+          @for (block of blocks(); track block.id) {
+            <div
+              cdkDrag
+              [cdkDragData]="block"
+              class="block-wrapper"
+              [class.block-wrapper--selected]="selectedId() === block.id"
+              [class.block-wrapper--hidden]="!block.visible"
+              (click)="selectBlock(block.id); $event.stopPropagation()"
+            >
+              <div class="drag-placeholder" *cdkDragPlaceholder></div>
+
+              <div class="block-toolbar">
+                <div cdkDragHandle class="block-toolbar__handle" title="Arrastrar">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="5" r="1" /><circle cx="15" cy="5" r="1" />
+                    <circle cx="9" cy="12" r="1" /><circle cx="15" cy="12" r="1" />
+                    <circle cx="9" cy="19" r="1" /><circle cx="15" cy="19" r="1" />
+                  </svg>
+                </div>
+                <span class="block-toolbar__label">{{ blockLabel(block.type) }}</span>
+                <div class="block-toolbar__actions">
+                  <button (click)="toggleVisibility(block.id, $event)" [title]="block.visible ? 'Ocultar' : 'Mostrar'" class="tb-btn">
+                    @if (block.visible) {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+                      </svg>
+                    } @else {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                      </svg>
+                    }
+                  </button>
+                  <button (click)="duplicateBlock(block.id, $event)" title="Duplicar" class="tb-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                  </button>
+                  <button (click)="removeBlock(block.id, $event)" title="Eliminar" class="tb-btn tb-btn--danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Bloque renderizado -->
+              <div class="block-preview" [class.block-preview--faded]="!block.visible">
+                @switch (block.type) {
+
+                  @case ('hero') {
+                    <div class="bp-hero"
+                      [class.bp-hero--custom]="!!$any(block).data.backgroundColor || !!$any(block).data.backgroundImage"
+                      [style.background]="$any(block).data.backgroundImage ? null : ($any(block).data.backgroundColor || null)"
+                      [style.backgroundImage]="$any(block).data.backgroundImage ? 'url(' + $any(block).data.backgroundImage + ')' : null">
+                      <div class="bp-hero__overlay" [class.bp-hero__overlay--on]="$any(block).data.overlay"></div>
+                      <div class="bp-hero__content">
+                        <h2 class="bp-hero__title" [style.color]="$any(block).data.titleColor || null">{{ $any(block).data.title }}</h2>
+                        @if ($any(block).data.subtitle) {
+                          <p class="bp-hero__subtitle" [style.color]="$any(block).data.subtitleColor || null">{{ $any(block).data.subtitle }}</p>
+                        }
+                        @if ($any(block).data.ctaLabel) {
+                          <span class="bp-hero__cta"
+                            [class.bp-hero__cta--custom]="!!$any(block).data.ctaBackgroundColor || !!$any(block).data.ctaTextColor"
+                            [style.background]="$any(block).data.ctaBackgroundColor || null"
+                            [style.color]="$any(block).data.ctaTextColor || null">{{ $any(block).data.ctaLabel }}</span>
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  @case ('text') {
+                    <app-text-block [block]="$any(block)" />
+                  }
+
+                  @case ('image') {
+                    <figure class="bp-image" [class.bp-image--full]="$any(block).data.fullWidth">
+                      <img
+                        class="bp-image__img"
+                        [src]="$any(block).data.src"
+                        [alt]="$any(block).data.alt"
+                      />
+                      @if ($any(block).data.caption) {
+                        <figcaption class="bp-image__caption">{{ $any(block).data.caption }}</figcaption>
+                      }
+                    </figure>
+                  }
+
+                  @case ('cards-grid') {
+                    <div class="bp-cards" [style.backgroundColor]="$any(block).data.backgroundColor || null">
+                      @if ($any(block).data.title) {
+                        <h2 class="bp-cards__title" [style.color]="$any(block).data.titleColor || null">{{ $any(block).data.title }}</h2>
+                      }
+                      @if ($any(block).data.subtitle) {
+                        <p class="bp-cards__subtitle" [style.color]="$any(block).data.subtitleColor || null">{{ $any(block).data.subtitle }}</p>
+                      }
+                      <div class="bp-cards__grid" [style.grid-template-columns]="'repeat(' + ($any(block).data.columns ?? 2) + ', 1fr)'">
+                        @for (card of $any(block).data.cards; track $index) {
+                          <div class="bp-card"
+                            [class.bp-card--custom]="$any(block).data.cardBackgroundColor || $any(block).data.cardBorderColor || $any(block).data.cardTextColor"
+                            [style.background]="$any(block).data.cardBackgroundColor || null"
+                            [style.borderColor]="$any(block).data.cardBorderColor || null"
+                            [style.color]="$any(block).data.cardTextColor || null">
+                            <strong>{{ card.title }}</strong>
+                            <p>{{ card.description }}</p>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  @case ('cta') {
+                    <app-cta-block [block]="$any(block)" />
+                  }
+
+                  @case ('video') {
+                    <div class="bp-video">
+                      @if ($any(block).data.url && getVideoEmbedUrl($any(block).data.url); as embedUrl) {
+                        <div class="bp-video__player">
+                          <iframe
+                            [src]="embedUrl"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                          ></iframe>
+                        </div>
+                        @if ($any(block).data.title) {
+                          <p class="bp-video__title">{{ $any(block).data.title }}</p>
+                        }
+                      } @else {
+                        <div class="bp-video__icon">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="2" y="6" width="20" height="12" rx="2"/>
+                            <polygon points="10 9 15 12 10 15" fill="#ff0000" stroke="none"/>
+                          </svg>
+                        </div>
+                        <p class="bp-video__placeholder">Pega una URL de YouTube en el panel derecho</p>
+                      }
+                    </div>
+                  }
+
+                  @default {
+                    <div class="block-unknown">
+                      <p>Vista previa no disponible para este bloque.</p>
+                    </div>
+                  }
+
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="builder-canvas__end"></div>
+      </div>
+    </main>
+
+    <!-- ── Panel derecho: propiedades ── -->
+    <aside class="builder-props" [class.builder-props--open]="selectedBlock()">
+      @if (selectedBlock(); as block) {
+        <div class="props-header">
+          <h3 class="props-header__title">{{ blockLabel(block.type) }}</h3>
+          <button class="icon-btn" (click)="deselect()" title="Cerrar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="props-body">
+          @switch (block.type) {
+
+            @case ('hero') {
+              <div class="prop-group">
+                <label class="prop-label">Título</label>
+                <input class="prop-input" type="text" [value]="$any(block).data.title" (input)="updateProp('title', strVal($event))" />
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Subtítulo</label>
+                <textarea class="prop-textarea" rows="2" [value]="$any(block).data.subtitle" (input)="updateProp('subtitle', strVal($event))"></textarea>
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Texto botón CTA</label>
+                <input class="prop-input" type="text" [value]="$any(block).data.ctaLabel" (input)="updateProp('ctaLabel', strVal($event))" />
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Ruta del CTA</label>
+                <input class="prop-input" type="text" [value]="$any(block).data.ctaRoute" (input)="updateProp('ctaRoute', strVal($event))" />
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Imagen de fondo (URL)</label>
+                <input class="prop-input" type="text"
+                  [value]="$any(block).data.backgroundImage ?? ''"
+                  (input)="updateProp('backgroundImage', strVal($event))"
+                  placeholder="images/hero.jpg" />
+                <button class="btn btn--ghost btn--sm" style="margin-top:6px; width:100%"
+                  (click)="openImagePicker('backgroundImage')">
+                  🖼️ Seleccionar desde Multimedia
+                </button>
+              </div>
+              <div class="prop-toggle">
+                <label class="prop-label">Overlay oscuro</label>
+                <input type="checkbox" [checked]="$any(block).data.overlay" (change)="updateProp('overlay', $any($event.target).checked)" />
+              </div>
+              <app-block-color-editor
+                [fields]="heroColorFields"
+                [data]="$any(block).data"
+                (colorChange)="updateColorProp($event.key, $event.value)"
+              />
+            }
+
+            @case ('text') {
+              <div class="prop-group">
+                <label class="prop-label">Título</label>
+                <input class="prop-input" type="text" [value]="$any(block).data.title ?? ''" (input)="updateProp('title', strVal($event))" />
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Contenido</label>
+                <quill-editor
+                  [ngModel]="$any(block).data.html"
+                  (ngModelChange)="onQuillChange($event)"
+                  [modules]="quillModules"
+                  [styles]="{ 'min-height': '200px' }"
+                  theme="snow"
+                ></quill-editor>
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Alineación</label>
+                <select class="prop-select" [value]="$any(block).data.align" (change)="updateProp('align', strVal($event))">
+                  <option value="left">Izquierda</option>
+                  <option value="center">Centro</option>
+                  <option value="right">Derecha</option>
+                </select>
+              </div>
+              <app-block-color-editor
+                [fields]="textColorFields"
+                [data]="$any(block).data"
+                (colorChange)="updateColorProp($event.key, $event.value)"
+              />
+            }
+
+            @case ('image') {
+              <div class="prop-group">
+                <label class="prop-label">URL de la imagen</label>
+                <input class="prop-input" type="text"
+                  [value]="$any(block).data.src"
+                  (input)="updateProp('src', strVal($event))" />
+                <button class="btn btn--ghost btn--sm" style="margin-top:6px; width:100%"
+                  (click)="openImagePicker('src')">
+                  🖼️ Seleccionar desde Multimedia
+                </button>
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Texto alternativo</label>
+                <input class="prop-input" type="text" [value]="$any(block).data.alt" (input)="updateProp('alt', strVal($event))" />
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Pie de foto</label>
+                <input class="prop-input" type="text" [value]="$any(block).data.caption ?? ''" (input)="updateProp('caption', strVal($event))" />
+              </div>
+              <div class="prop-toggle">
+                <label class="prop-label">Ancho completo</label>
+                <input type="checkbox" [checked]="$any(block).data.fullWidth" (change)="updateProp('fullWidth', $any($event.target).checked)" />
+              </div>
+            }
+
+            @case ('cards-grid') {
+              <div class="prop-group">
+                <label class="prop-label">Título de sección</label>
+                <input class="prop-input" type="text" [value]="$any(block).data.title ?? ''" (input)="updateProp('title', strVal($event))" />
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Subtítulo</label>
+                <input class="prop-input" type="text" [value]="$any(block).data.subtitle ?? ''" (input)="updateProp('subtitle', strVal($event))" />
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Columnas</label>
+                <select class="prop-select" [value]="$any(block).data.columns ?? 2" (change)="updateProp('columns', numVal($event))">
+                  <option [value]="2">2 columnas</option>
+                  <option [value]="3">3 columnas</option>
+                  <option [value]="4">4 columnas</option>
+                </select>
+              </div>
+              <app-cards-editor
+                [cards]="$any(block).data.cards ?? []"
+                (cardsChange)="updateProp('cards', $event)"
+              />
+              <app-block-color-editor
+                [fields]="cardsColorFields"
+                [data]="$any(block).data"
+                (colorChange)="updateColorProp($event.key, $event.value)"
+              />
+            }
+
+            @case ('cta') {
+              <div class="prop-group">
+                <label class="prop-label">Título</label>
+                <input class="prop-input" type="text" [value]="$any(block).data.title" (input)="updateProp('title', strVal($event))" />
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Descripción</label>
+                <textarea class="prop-textarea" rows="3" [value]="$any(block).data.description ?? ''" (input)="updateProp('description', strVal($event))"></textarea>
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Texto botón primario</label>
+                <input class="prop-input" type="text" [value]="$any(block).data.primaryLabel" (input)="updateProp('primaryLabel', strVal($event))" />
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Ruta botón primario</label>
+                <input class="prop-input" type="text" [value]="$any(block).data.primaryRoute" (input)="updateProp('primaryRoute', strVal($event))" />
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Variante</label>
+                <select class="prop-select" [value]="$any(block).data.variant" (change)="updateProp('variant', strVal($event))">
+                  <option value="primary">Azul</option>
+                  <option value="accent">Verde teal</option>
+                </select>
+              </div>
+            }
+
+            @case ('video') {
+              <div class="prop-group">
+                <label class="prop-label">URL de YouTube</label>
+                <input
+                  class="prop-input"
+                  type="text"
+                  [value]="$any(block).data.url ?? ''"
+                  (input)="updateProp('url', strVal($event))"
+                  placeholder="https://www.youtube.com/watch?v=..."
+                />
+                <span class="prop-hint">Pega la URL completa del video</span>
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Título (opcional)</label>
+                <input
+                  class="prop-input"
+                  type="text"
+                  [value]="$any(block).data.title ?? ''"
+                  (input)="updateProp('title', strVal($event))"
+                />
+              </div>
+            }
+
+          }
+        </div>
+      } @else {
+        <div class="props-empty">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+          </svg>
+          <p>Selecciona un bloque para editar sus propiedades</p>
+        </div>
+      }
+    </aside>
+
+  </div>
+  @if (showImagePicker()) {
+  <app-image-picker
+    (imageSelected)="onImageSelected($event)"
+    (closed)="showImagePicker.set(false)"
+  />
+}
+</div>

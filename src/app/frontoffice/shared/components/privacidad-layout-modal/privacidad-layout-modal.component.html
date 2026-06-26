@@ -1,0 +1,71 @@
+@if (isVisible) {
+  <div class="ug-modal-overlay" (click)="close()">
+    <div class="access-card" (click)="$event.stopPropagation()">
+      <div class="card-header">
+        <div class="icon-main">
+          <i class="bi bi-shield-lock-fill"></i>
+        </div>
+        <div class="title-group">
+          <span class="tag">SEGURIDAD DIGITAL</span>
+          <h2>Política de Privacidad</h2>
+        </div>
+        <button class="close-x" (click)="close()">×</button>
+      </div>
+
+      <div class="card-body">
+        <p class="intro">
+          En cumplimiento con la
+          <strong>Ley Orgánica de Protección de Datos Personales (LOPDP)</strong>, informamos que
+          los datos en este sistema se tratarán bajo los siguientes términos:
+        </p>
+
+        <div class="features-list">
+          <div class="feature-item">
+            <div class="f-icon"><i class="bi bi-check-circle-fill"></i></div>
+            <div class="f-text">
+              <span class="f-title">1. Finalidad</span>
+              <p class="f-desc">
+                Uso exclusivo para gestión académica, administrativa y servicios estudiantiles de la
+                UG.
+              </p>
+            </div>
+          </div>
+
+          <div class="feature-item">
+            <div class="f-icon"><i class="bi bi-bank2"></i></div>
+            <div class="f-text">
+              <span class="f-title">2. Base Legal</span>
+              <p class="f-desc">
+                Tratamiento fundamentado en la relación educativa y las competencias legales de la
+                LOES.
+              </p>
+            </div>
+          </div>
+
+          <div class="feature-item">
+            <div class="f-icon"><i class="bi bi-shield-shaded"></i></div>
+            <div class="f-text">
+              <span class="f-title">3. Confidencialidad</span>
+              <p class="f-desc">
+                Garantizamos medidas técnicas para evitar la pérdida o acceso no autorizado a su
+                información.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-box">
+          <i class="bi bi-info-circle-fill"></i>
+          <span
+            >Al presionar "Ok", usted confirma que ha sido informado sobre el tratamiento de sus
+            datos.</span
+          >
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <button class="btn-primary-ug" (click)="close()">Ok, he leído</button>
+      </div>
+    </div>
+  </div>
+}

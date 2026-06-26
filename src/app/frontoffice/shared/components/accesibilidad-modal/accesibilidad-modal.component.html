@@ -1,0 +1,46 @@
+@if (isVisible) {
+  <div class="ug-access-overlay" (click)="close()">
+    <div class="access-card" (click)="$event.stopPropagation()">
+      <div class="card-header">
+        <div class="icon-main">
+          <i class="bi bi-universal-access-circle"></i>
+        </div>
+        <div class="title-group">
+          <span class="tag">COMPROMISO SOCIAL</span>
+          <h2>Accesibilidad Digital</h2>
+        </div>
+        <button class="close-x" (click)="close()">×</button>
+      </div>
+
+      <div class="card-body">
+        <p class="intro">
+          En la <strong>Universidad de Guayaquil</strong>, trabajamos para que el conocimiento sea
+          accesible para todos, eliminando barreras tecnológicas en nuestra UG Wiki.
+        </p>
+
+        <div class="features-list">
+          @for (item of caracteristicas; track item.titulo) {
+            <div class="feature-item">
+              <div class="f-icon">
+                <i class="bi" [ngClass]="item.icon"></i>
+              </div>
+              <div class="f-text">
+                <span class="f-title">{{ item.titulo }}</span>
+                <p class="f-desc">{{ item.desc }}</p>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="help-box">
+          <i class="bi bi-info-square-fill"></i>
+          <span>Si experimentas alguna dificultad técnica, contacta con el soporte del CMS.</span>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <button class="btn-primary-ug" (click)="close()">Entendido</button>
+      </div>
+    </div>
+  </div>
+}

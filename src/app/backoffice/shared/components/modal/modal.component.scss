@@ -1,0 +1,114 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 500;
+  animation: fadeIn .15s ease;
+}
+
+.modal {
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 480px;
+  animation: slideUp .2s ease;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem 0;
+  }
+
+  &__title {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    padding: .25rem;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    display: flex;
+    transition: background var(--transition);
+
+    &:hover { background: var(--color-bg); }
+  }
+
+  &__description {
+    padding: .625rem 1.5rem 0;
+    font-size: .875rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+  }
+
+  &__body {
+    padding: 1rem 1.5rem;
+
+    &:empty { padding: 0; }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: .625rem;
+    padding: 0 1.5rem 1.25rem;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .625rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-size: .875rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background var(--transition), opacity var(--transition);
+
+    &:disabled { opacity: .6; cursor: not-allowed; }
+
+    &--cancel {
+      background: var(--color-bg);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+
+      &:hover:not(:disabled) { background: #e2e8f0; }
+    }
+
+    &--confirm {
+      background: var(--color-primary);
+      color: #fff;
+
+      &:hover:not(:disabled) { background: var(--color-primary-dark); }
+    }
+
+    &--danger {
+      background: var(--color-danger);
+      color: #fff;
+
+      &:hover:not(:disabled) { background: #dc2626; }
+    }
+  }
+
+  &__spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+}
+
+@keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes spin    { to { transform: rotate(360deg); } }

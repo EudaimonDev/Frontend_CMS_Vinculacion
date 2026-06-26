@@ -1,0 +1,21 @@
+<div class="category-page">
+  <div class="category-header">
+    <h1>{{ categoryName() | titlecase }}</h1>
+    <p>{{ articles().length }} artículo(s) encontrado(s)</p>
+  </div>
+
+  <div class="loading" *ngIf="loading()">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="cards-grid" *ngIf="!loading()">
+    <app-article-card
+      *ngFor="let article of articles()"
+      [article]="article"
+    />
+
+    <div class="empty" *ngIf="articles().length === 0">
+      No hay artículos en esta categoría aún.
+    </div>
+  </div>
+</div>

@@ -1,0 +1,69 @@
+<div class="media-filters">
+
+  <!-- Búsqueda -->
+  <div class="mf-search">
+    <svg class="mf-search__icon" width="16" height="16" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input
+      type="text"
+      class="mf-search__input"
+      placeholder="Buscar por nombre o etiquetas..."
+      [value]="media.filters().search"
+      (input)="onSearch($any($event.target).value)"
+    />
+  </div>
+
+  <!-- Controles derechos -->
+  <div class="mf-controls">
+
+    <!-- Orden -->
+    <select class="mf-select"
+            [value]="media.filters().sortBy"
+            (change)="onSortChange($any($event.target).value)">
+      @for (opt of sortOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+
+    <!-- Dirección de orden -->
+    <button class="mf-icon-btn" title="Invertir orden" (click)="toggleSortDir()">
+      @if (media.filters().sortDir === 'desc') {
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+        </svg>
+      } @else {
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+        </svg>
+      }
+    </button>
+
+    <!-- Toggle grid / list -->
+    <div class="mf-view-toggle">
+      <button class="mf-icon-btn"
+              [class.active]="media.filters().viewMode === 'grid'"
+              title="Vista de cuadrícula"
+              (click)="setViewMode('grid')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+        </svg>
+      </button>
+      <button class="mf-icon-btn"
+              [class.active]="media.filters().viewMode === 'list'"
+              title="Vista de lista"
+              (click)="setViewMode('list')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+          <line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+</div>

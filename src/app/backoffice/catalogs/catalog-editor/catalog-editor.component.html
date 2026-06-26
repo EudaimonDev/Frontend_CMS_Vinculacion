@@ -1,0 +1,176 @@
+<app-page-header [title]="headerTitle()" [breadcrumbs]="breadcrumbs()">
+  @if (saved()) {
+    <span class="saved-badge">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+      Guardado
+    </span>
+  }
+  <a routerLink="/admin/catalogs" class="btn btn--ghost">Cancelar</a>
+  <button type="button" class="btn btn--primary" [disabled]="saving()" (click)="onSave()">
+    @if (saving()) {
+      <span class="spinner"></span>
+      Guardando...
+    } @else {
+      Guardar catálogo
+    }
+  </button>
+</app-page-header>
+
+<div class="editor-layout" [class.editor-layout--full]="mode() === 'new'">
+  <aside class="editor-sidebar">
+    <section class="card">
+      <div class="card__header">
+        <div>
+          <h3 class="card__title">Configuración general</h3>
+          <p class="card__subtitle">Define el marco editorial y operativo del catálogo.</p>
+        </div>
+      </div>
+
+      <form [formGroup]="form" class="form-stack">
+        <div class="form-group" [class.form-group--error]="fieldError('name', 'required')">
+          <label class="form-label">Nombre del catálogo <span class="required">*</span></label>
+          <input type="text" formControlName="name" class="form-input" placeholder="Ej. Servicios Obstétricos" />
+          @if (fieldError('name', 'required')) {
+            <span class="form-error">El nombre es obligatorio.</span>
+          }
+          @if (fieldError('name', 'minlength')) {
+            <span class="form-error">Usa al menos 3 caracteres.</span>
+          }
+        </div>
+
+        <div class="form-group" [class.form-group--error]="fieldError('slug', 'required')">
+          <label class="form-label">Slug <span class="required">*</span></label>
+          <input type="text" formControlName="slug" class="form-input form-input--mono" placeholder="servicios-obstetricos" />
+          <span class="form-hint">Se usa como identificador amigable del catálogo.</span>
+        </div>
+
+        <div class="form-group" [class.form-group--error]="fieldError('description', 'required')">
+          <label class="form-label">Descripción <span class="required">*</span></label>
+          <textarea formControlName="description" rows="4" class="form-textarea"
+            placeholder="Describe el objetivo del catálogo..."></textarea>
+          @if (fieldError('description', 'required')) {
+            <span class="form-error">La descripción es obligatoria.</span>
+          }
+          @if (fieldError('description', 'minlength')) {
+            <span class="form-error">Usa al menos 12 caracteres.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Imagen de portada</label>
+          <input type="text" formControlName="imageUrl" class="form-input" placeholder="https://ejemplo.com/imagen.jpg" />
+          <span class="form-hint">Pega una URL de imagen externa.</span>
+          @if (form.value.imageUrl && form.value.imageUrl.startsWith('http')) {
+            <img [src]="form.value.imageUrl" alt="Vista previa"
+              style="margin-top:8px;width:100%;height:120px;object-fit:cover;border-radius:8px" />
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Estado</label>
+            <select formControlName="status" class="form-select">
+              @for (status of statusOptions; track status.value) {
+                <option [value]="status.value">{{ status.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Visibilidad</label>
+            <select formControlName="visibility" class="form-select">
+              @for (visibility of visibilityOptions; track visibility.value) {
+                <option [value]="visibility.value">{{ visibility.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <section class="card card--soft">
+      <div class="card__header card__header--compact">
+        <div>
+          <h3 class="card__title">Vista rápida</h3>
+          <p class="card__subtitle">Resumen del estado actual.</p>
+        </div>
+      </div>
+      <div class="preview-list">
+        <div class="preview-item">
+          <span class="preview-item__label">Slug</span>
+          <code class="slug-chip">{{ form.value.slug || 'sin-definir' }}</code>
+        </div>
+        <div class="preview-item">
+          <span class="preview-item__label">Visibilidad</span>
+          <span class="preview-item__value">{{ visibilityLabel(form.value.visibility || 'public') }}</span>
+        </div>
+      </div>
+    </section>
+  </aside>
+
+  <!-- Artículos de esta categoría -->
+  @if (mode() === 'edit') {
+    <section class="editor-main">
+      <section class="card">
+        <div class="card__header">
+          <div>
+            <h3 class="card__title">Artículos en esta categoría</h3>
+            <p class="card__subtitle">{{ articleCount() }} artículo(s) asignado(s).</p>
+          </div>
+        </div>
+
+        @if (articles().length === 0) {
+          <div class="items-empty">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="1.3">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            <p>No hay artículos asignados a esta categoría aún.</p>
+          </div>
+        } @else {
+          <div class="items-list">
+            @for (article of articles(); track article.id) {
+              <article class="item-card">
+                <div class="item-card__top">
+                  <div class="item-card__identity">
+                    <div class="item-card__content">
+                      <div class="item-card__headline">
+                        <h4>{{ article.title }}</h4>
+                        @if (article.featured) {
+                          <span class="featured-badge">Destacado</span>
+                        }
+                      </div>
+                      <div class="item-card__meta">
+                        <span class="category-pill"
+                          [style.background]="article.statusName === 'Published' ? '#dcfce7' : '#fef9c3'"
+                          [style.color]="article.statusName === 'Published' ? '#166534' : '#854d0e'">
+                          {{ article.statusName === 'Published' ? 'Publicado' : 'Borrador' }}
+                        </span>
+                        <code class="slug-chip">{{ article.slug }}</code>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="item-card__actions">
+                    <a [routerLink]="['/admin/pages', article.id, 'edit']"
+                      class="action-btn action-btn--edit">
+                      Editar
+                    </a>
+                  </div>
+                </div>
+                <p class="item-card__summary">{{ article.excerpt }}</p>
+                <div class="item-card__footer">
+                  <span>{{ article.date }}</span>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </section>
+    </section>
+  }
+</div>

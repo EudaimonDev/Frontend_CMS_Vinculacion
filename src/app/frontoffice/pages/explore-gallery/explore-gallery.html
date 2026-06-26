@@ -1,0 +1,64 @@
+<div class="explore-gallery-container">
+  <nav class="navigation-wrapper">
+    <a routerLink="/" class="back-link">← Volver al inicio</a>
+  </nav>
+
+  <header class="main-header">
+    <div class="header-content">
+      <h1>Galería de Contenidos</h1>
+      <p class="subtitle">Explora los temas académicos de la universidad.</p>
+    </div>
+  </header>
+
+  <section class="toolbar">
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Buscar tema..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="updateSearch($event)">
+    </div>
+
+    <div class="filter-group">
+      <label for="gallery-sort">Ordenar por:</label>
+      <select id="gallery-sort" [ngModel]="selectedSort()" (change)="updateSort($any($event.target).value)">
+        <option value="todas">Todos (orden original)</option>
+        <optgroup label="Alfabético">
+          <option value="az">De la A a la Z</option>
+          <option value="za">De la Z a la A</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="results-count">
+      {{ filteredCategories().length }} temas encontrados
+    </div>
+  </section>
+
+  <main class="gallery-grid">
+  @for (item of filteredCategories(); track item.categoryId; let i = $index) {
+    <div class="category-card"
+         [style.background]="item.imageUrl ? 'none' : getGradient(i)"
+         [routerLink]="['/categoria', item.slug]">
+      @if (item.imageUrl) {
+        <img [src]="item.imageUrl" [alt]="item.name"
+          style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0;border-radius:inherit" />
+        <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:1;border-radius:inherit"></div>
+      }
+      <div style="position:relative;z-index:2">
+        @if (!item.imageUrl) {
+          <span class="icon">{{ getIcon(i) }}</span>
+        }
+        <h3>{{ item.name }}</h3>
+        @if (item.description) {
+          <p class="category-desc">{{ item.description }}</p>
+        }
+      </div>
+    </div>
+  } @empty {
+    <div class="empty-state">
+      <p>No se encontraron temas para "{{ searchQuery() }}"</p>
+    </div>
+  }
+</main>
+</div>

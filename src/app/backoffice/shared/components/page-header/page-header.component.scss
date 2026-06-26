@@ -1,0 +1,47 @@
+.page-header {
+  margin-bottom: 1.75rem;
+
+  &__breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: .375rem;
+    margin-bottom: .5rem;
+  }
+
+  &__crumb {
+    font-size: .8125rem;
+    color: var(--color-text-muted);
+
+    &--active { color: var(--color-text); font-weight: 500; }
+  }
+
+  &__crumb-sep { color: var(--color-text-light); font-size: .75rem; }
+
+  &__body {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.2;
+  }
+
+  &__description {
+    margin-top: .25rem;
+    font-size: .875rem;
+    color: var(--color-text-muted);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: .625rem;
+    flex-shrink: 0;
+  }
+}

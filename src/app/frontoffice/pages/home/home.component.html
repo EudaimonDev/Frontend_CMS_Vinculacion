@@ -1,0 +1,9 @@
+@if (!loading()) {
+  <div class="home-content">
+    @for (block of blocks(); track block.id) {
+      <app-block-renderer [block]="block" />
+    }
+  </div>
+} @else {
+  <div class="loading">Cargando...</div>
+}

@@ -1,0 +1,24 @@
+<div class="admin-layout" [class.admin-layout--collapsed]="sidebarCollapsed()">
+
+  <!-- Overlay móvil -->
+  @if (mobileSidebarOpen()) {
+    <div class="sidebar-overlay" (click)="closeMobileSidebar()"></div>
+  }
+
+  <!-- Sidebar -->
+  <app-sidebar
+    [collapsed]="sidebarCollapsed()"
+    (closeMobile)="closeMobileSidebar()"
+    class="admin-layout__sidebar"
+    [class.admin-layout__sidebar--open]="mobileSidebarOpen()"
+  />
+
+  <!-- Contenido principal -->
+  <div class="admin-layout__content">
+    <app-header (toggleSidebar)="toggleSidebar()" />
+    <main class="admin-layout__main">
+      <router-outlet />
+    </main>
+  </div>
+
+</div>

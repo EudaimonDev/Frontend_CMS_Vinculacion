@@ -1,0 +1,64 @@
+<section class="multimedia-shell">
+  <!--Cabecera-->
+  <header class="mm-header">
+    <div class="mm-header__title">
+      <span class="mm-header__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+      </span>
+      <h1>Gestor de Imágenes</h1>
+      <span class="mm-header__count">{{ media.totalItems() }} archivos</span>
+    </div>
+
+    <button class="btn-primary" (click)="openUpload()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      Subir Imágenes
+    </button>
+  </header>
+
+  <!--Barra de filtros-->
+  <app-media-filters />
+
+  <!--Zona de contenido (grid ó list)-->
+  <main class="mm-content">
+
+    @if (media.filteredItems().length === 0) {
+      <!-- Estado vacío -->
+      <div class="mm-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+        <p>No se encontraron archivos</p>
+        <span>Sube tu primera imagen o ajusta los filtros</span>
+      </div>
+    } @else {
+      <!-- Grid o lista según viewMode -->
+      @if (media.filters().viewMode === 'grid') {
+        <app-media-grid />
+      } @else {
+        <app-media-list />
+      }
+    }
+
+  </main>
+
+  <!--Panel de subida (overlay lateral)-->
+  @if (showUpload) {
+    <app-media-upload (closed)="closeUpload()" />
+  }
+
+  <!--Panel de detalle (slide-in lateral)-->
+  @if (media.selectedItem()) {
+    <app-media-detail />
+  }
+
+</section>

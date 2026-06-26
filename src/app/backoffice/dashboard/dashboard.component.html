@@ -1,0 +1,71 @@
+<div class="dashboard">
+
+  <app-page-header
+    title="Dashboard"
+    description="Resumen general del sistema CMS"
+    [breadcrumbs]="[{ label: 'Inicio' }, { label: 'Dashboard' }]"
+  >
+    <span class="dashboard__date">{{ today | date:'fullDate' }}</span>
+  </app-page-header>
+
+  <!-- Tarjetas de estadísticas -->
+  <div class="stats-grid">
+    @for (stat of stats(); track stat.label) {
+      <div class="stat-card stat-card--{{ stat.color }}">
+        <div class="stat-card__body">
+          <div>
+            <p class="stat-card__label">{{ stat.label }}</p>
+            <p class="stat-card__value">{{ stat.value }}</p>
+            <p class="stat-card__change stat-card__change--{{ stat.changeType }}">
+              @if (stat.changeType === 'up') {
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="18 15 12 9 6 15"/>
+                </svg>
+              } @else if (stat.changeType === 'down') {
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              }
+              {{ stat.change }}
+            </p>
+          </div>
+          <div class="stat-card__icon-wrap">
+            <img
+              [src]="'/images/' + stat.icon + '.png'"
+              [alt]="stat.label"
+              class="stat-card__img"
+              onerror="this.style.display='none'"
+            />
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Actividad reciente -->
+  <div class="activity-card">
+    <div class="activity-card__header">
+      <h2 class="activity-card__title">Actividad reciente</h2>
+    </div>
+    <ul class="activity-list">
+      @for (activity of recentActivity(); track $index) {
+        <li class="activity-item">
+          <div class="activity-item__avatar">
+            {{ activity.user.charAt(0) }}
+          </div>
+          <div class="activity-item__content">
+            <p class="activity-item__text">
+              <strong>{{ activity.user }}</strong>
+              {{ activity.action }}
+              @if (activity.target) {
+                <span class="activity-item__target">«{{ activity.target }}»</span>
+              }
+            </p>
+            <span class="activity-item__time">{{ activity.time }}</span>
+          </div>
+        </li>
+      }
+    </ul>
+  </div>
+
+</div>

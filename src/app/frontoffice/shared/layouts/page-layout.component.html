@@ -1,0 +1,23 @@
+<app-navbar></app-navbar>
+
+<main class="main-content">
+  <router-outlet />
+</main>
+
+<footer class="footer">
+  <p class="gate-footer">© {{ currentYear }} Universidad de Guayaquil · UG Wiki</p>
+  <a href="https://www.ug.edu.ec/" aria-label="Universidad de Guayaquil" target="_blank" rel="noopener">
+    <img class="footer-logo" src="/images/UG_logo_white_105x58_optimized.webp" alt="UG Logo" height="18px">
+  </a>
+  <div class="footer-links">
+    <a href="#" (click)="$event.preventDefault(); togglePrivacidad(true)">Política de privacidad</a>
+    <a href="#" (click)="$event.preventDefault(); toggleContact(true)">Contacto</a>
+    <a href="#" (click)="$event.preventDefault(); toggleAccess(true)">Accesibilidad</a>
+  </div>
+</footer>
+
+<app-contacto-modal [isVisible]="showContact" (onClose)="showContact = false" />
+
+<app-accesibilidad-modal [isVisible]="showAccess" (onClose)="showAccess = false" />
+
+<app-privacidad-layout-modal [isVisible]="showPrivacidad" (onClose)="showPrivacidad = false" />

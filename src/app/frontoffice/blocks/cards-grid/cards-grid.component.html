@@ -1,0 +1,13 @@
+<section class="cards-section">
+  <div class="section-header">
+    <h2>{{ data.title }}</h2>
+    <a class="see-all" routerLink="/explorar">Ver todas →</a>
+  </div>
+
+  <div class="cards-grid">
+    <app-article-card
+      *ngFor="let article of data.articles"
+      [article]="article"
+    />
+  </div>
+</section>

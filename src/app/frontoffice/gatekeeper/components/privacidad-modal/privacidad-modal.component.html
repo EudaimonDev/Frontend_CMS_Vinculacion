@@ -1,0 +1,60 @@
+@if (isVisible) {
+<div class="ug-modal-overlay" (click)="close()">
+  <div class="access-card" (click)="$event.stopPropagation()">
+    
+    <div class="card-header">
+      <div class="icon-main">
+        <i class="bi bi-shield-lock-fill"></i>
+      </div>
+      <div class="title-group">
+        <span class="tag">SEGURIDAD DIGITAL</span>
+        <h2>Política de Privacidad</h2>
+      </div>
+      <button class="close-x" (click)="close()">×</button>
+    </div>
+
+    <div class="card-body">
+      <p class="intro">
+        En cumplimiento con la <strong>Ley Orgánica de Protección de Datos Personales (LOPDP)</strong>, tus datos serán tratados bajo los siguientes términos:
+      </p>
+
+      <div class="features-list">
+        <div class="feature-item">
+          <div class="f-icon"><i class="bi bi-check-circle-fill"></i></div>
+          <div class="f-text">
+            <span class="f-title">Finalidad</span>
+            <p class="f-desc">Tus datos se utilizarán exclusivamente para gestión académica y servicios estudiantiles de la UG.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="f-icon"><i class="bi bi-bank2"></i></div>
+          <div class="f-text">
+            <span class="f-title">Base Legal</span>
+            <p class="f-desc">Tratamiento fundamentado en la relación educativa y competencias legales otorgadas por la LOES.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="f-icon"><i class="bi bi-person-check-fill"></i></div>
+          <div class="f-text">
+            <span class="f-title">Tus Derechos</span>
+            <p class="f-desc">Puedes ejercer tus derechos de acceso, rectificación y eliminación por canales oficiales.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="help-box">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>Al continuar, confirmas que has sido informado sobre el tratamiento de tus datos.</span>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button class="btn-primary-ug" (click)="close()">
+        Ok, he leído
+      </button>
+    </div>
+  </div>
+</div>
+}

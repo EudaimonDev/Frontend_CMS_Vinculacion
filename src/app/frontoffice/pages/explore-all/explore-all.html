@@ -1,0 +1,66 @@
+<div class="explore-container">
+  <nav class="top-nav">
+    <a routerLink="/" class="back-link">
+      <span class="arrow">←</span> Volver al inicio
+    </a>
+  </nav>
+
+  <header class="page-header">
+    <h1>Repositorio de Publicaciones</h1>
+    <p>Explora todo el contenido académico y cultural de la UG.</p>
+  </header>
+
+  <section class="toolbar">
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Filtrar por título..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="updateSearch($event)">
+    </div>
+
+    <div class="filter-group">
+      <div class="select-wrapper">
+        <label for="cat-select">Categoría:</label>
+        <select
+          id="cat-select"
+          [value]="selectedCategory()"
+          (change)="setCategory($any($event.target).value)">
+          @for (cat of categories; track cat.slug) {
+            <option [value]="cat.slug">{{ cat.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="select-wrapper">
+        <label for="fecha-select">Ordenar:</label>
+        <select
+          id="fecha-select"
+          [value]="selectedDateFilter()"
+          (change)="setDateFilter($any($event.target).value)">
+          <option value="todas">Por defecto</option>
+          <optgroup label="Cronología">
+            <option value="recientes">Más recientes primero</option>
+            <option value="antiguas">Más antiguas primero</option>
+          </optgroup>
+          <optgroup label="Alfabético">
+            <option value="az">A a la Z</option>
+            <option value="za">Z a la A</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+
+    <div class="results-count">
+      {{ displayArticles().length }} publicaciones
+    </div>
+  </section>
+
+  <main class="articles-grid">
+    @for (article of displayArticles(); track article.id) {
+      <app-article-card [article]="article"></app-article-card>
+    } @empty {
+      <div class="empty-msg">No se encontraron artículos con estos filtros.</div>
+    }
+  </main>
+</div>

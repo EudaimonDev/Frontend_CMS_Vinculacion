@@ -1,0 +1,69 @@
+@if (loading()) {
+  <div class="loading">
+    <app-loading-spinner></app-loading-spinner>
+  </div>
+} @else if (article(); as art) {
+  <article class="article-page">
+    <div class="article-shell">
+      <div class="article-layout">
+        <div class="article-main">
+          <header class="article-header-card">
+            <div class="floating-category" [ngClass]="art.category">
+              {{ art.category | uppercase }}
+            </div>
+
+            <a class="back-link" routerLink="/explorar">
+              <span class="arrow">←</span> Volver al repositorio
+            </a>
+            <h1>{{ art.title }}</h1>
+            <div class="article-meta">
+              <div class="meta-item"><span class="icon">📅</span> {{ art.date }}</div>
+              <span class="dot"></span>
+              <div class="meta-item">
+                <span class="icon">⏱️</span> {{ art.readingTime | readingTime }}
+              </div>
+            </div>
+
+            @if (art.excerpt) {
+              <p class="article-excerpt">{{ art.excerpt }}</p>
+            }
+          </header>
+
+          <div class="article-blocks">
+            @if (safeContent()) {
+              <div class="article-body-text" [innerHTML]="safeContent()"></div>
+            } @else {
+              <p class="article-body-empty">No hay contenido disponible.</p>
+            }
+          </div>
+        </div>
+
+        <aside class="article-sidebar">
+          <div class="sidebar-card">
+            <h3>COMPARTIR</h3>
+            <div class="share-buttons">
+              <button (click)="shareTwitter()">𝕏 Twitter</button>
+              <button (click)="shareLinkedIn()">in LinkedIn</button>
+              <button (click)="copyLink()">🔗 Copiar</button>
+            </div>
+          </div>
+
+          @if (art.category) {
+            <div class="sidebar-card">
+              <h3>CATEGORÍA</h3>
+              <div class="floating-category" [ngClass]="art.category">
+                {{ art.category | uppercase }}
+              </div>
+            </div>
+          }
+        </aside>
+      </div>
+    </div>
+
+    @if (showCopyToast()) {
+      <div class="copy-toast">
+        ✅ Link copiado al portapapeles
+      </div>
+    }
+  </article>
+}

@@ -1,0 +1,96 @@
+<div class="register-form" [formGroup]="form">
+  <div class="form-header">
+    <img src="/images/logo-ug.png" alt="Universidad de Guayaquil" class="logo-ug" />
+    <span class="logo-divider">×</span>
+    <img src="/images/logo-alianza.png" alt="Misión Alianza" class="logo-alianza" />
+    <div class="form-header-text">
+      <strong>Universidad de Guayaquil</strong>
+      <span>EN ALIANZA CON MISIÓN ALIANZA</span>
+    </div>
+  </div>
+
+  <h1>Bienvenido al Portal</h1>
+  <p class="form-subtitle">Completa los siguientes datos para continuar.</p>
+
+  <div class="error-banner" *ngIf="error()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+    {{ error() }}
+  </div>
+
+  <!-- NOMBRES (OPCIONAL) -->
+  <div class="field">
+    <label>Nombres (opcional)</label>
+    <input
+      type="text"
+      formControlName="nombres"
+      placeholder="Tu nombre"
+      autocomplete="given-name"
+    />
+  </div>
+
+  <!-- EDAD (OBLIGATORIO) -->
+  <div class="field" [class.invalid]="isInvalid('edad')">
+    <label>Edad</label>
+    <input
+      type="text"
+      formControlName="edad"
+      placeholder="Tu edad"
+      (keypress)="soloNumeros($event)"
+      maxlength="3"
+      inputmode="numeric"
+    />
+    <span class="field-error" *ngIf="isInvalid('edad')">Ingresa una edad válida</span>
+  </div>
+
+  <!-- SEXO (OBLIGATORIO) -->
+  <div class="field" [class.invalid]="isInvalid('sexo')">
+    <label>Sexo</label>
+    <div class="sexo-options">
+      <!-- Femenino -->
+      <button
+        type="button"
+        class="sexo-btn"
+        [class.sexo-btn--active-femenino]="form.get('sexo')?.value === 'femenino'"
+        (click)="form.get('sexo')?.setValue('femenino')"
+      >
+        Femenino
+      </button>
+
+      <!-- Masculino -->
+      <button
+        type="button"
+        class="sexo-btn"
+        [class.sexo-btn--active-masculino]="form.get('sexo')?.value === 'masculino'"
+        (click)="form.get('sexo')?.setValue('masculino')"
+      >
+        Masculino
+      </button>
+
+      <!-- Otro -->
+      <button
+        type="button"
+        class="sexo-btn"
+        [class.sexo-btn--active-otro]="form.get('sexo')?.value === 'otro'"
+        (click)="form.get('sexo')?.setValue('otro')"
+      >
+        Otro
+      </button>
+    </div>
+    <span class="field-error" *ngIf="isInvalid('sexo')">Selecciona una opción</span>
+  </div>
+
+  <button
+    type="button"
+    class="btn-submit"
+    [class.loading]="loading()"
+    [disabled]="loading()"
+    (click)="onSubmit()"
+  >
+    <span *ngIf="!loading()">Ingresar al Portal →</span>
+    <span *ngIf="loading()" class="btn-spinner"></span>
+  </button>
+</div>
