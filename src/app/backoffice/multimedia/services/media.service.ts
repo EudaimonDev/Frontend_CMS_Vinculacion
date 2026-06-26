@@ -52,6 +52,25 @@ export class MediaService {
     this.loadAll();
   }
 
+  uploadSlides(file: File, articleId?: number): Promise<any[]> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  let url = `${this.api}/Media/admin/upload-slides`;
+  if (articleId) url += `?articleId=${articleId}`;
+
+  return new Promise((resolve, reject) => {
+    this.http.post<any[]>(url, formData).subscribe({
+      next: medias => {
+        const items = medias.map(this.mapToMediaItem);
+        this._items.update(list => [...items, ...list]);
+        resolve(items);
+      },
+      error: reject
+    });
+  });
+}
+
   private loadAll(): void {
     this.http
       .get<any[]>(`${this.api}/Media/admin`, { params: { page: 1, pageSize: 100 } })

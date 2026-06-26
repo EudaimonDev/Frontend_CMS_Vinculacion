@@ -61,6 +61,7 @@ export class PageEditorComponent implements OnInit {
   blockOptions: BlockOption[] = [
     { type: 'hero', label: 'Titulo', description: 'Banner principal con título y CTA', icon: 'hero' },
     { type: 'text', label: 'Texto', description: 'Bloque de contenido HTML', icon: 'text' },
+    { type: 'slides', icon: 'slides', label: 'Diapositivas', description: 'Inserta una presentación de Canva' },
     {
       type: 'image',
       label: 'Imagen',
@@ -340,6 +341,8 @@ export class PageEditorComponent implements OnInit {
           order,
           data: { url: '', title: '' }
         };
+      case 'slides':
+      return { id, type, visible: true, order, data: { title: '', canvaUrl: '' } };
       default:
         throw new Error(`Tipo de bloque desconocido: ${type}`);
     }

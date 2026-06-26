@@ -103,6 +103,12 @@
                     <rect x="2" y="6" width="20" height="12" rx="2" /><polygon points="10 9 15 12 10 15" fill="currentColor" stroke="none" />
                   </svg>
                 }
+                @case ('slides') {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="2" y="4" width="20" height="14" rx="2"/>
+                    <line x1="2" y1="20" x2="22" y2="20"/>
+                  </svg>
+                }
               }
             </span>
             <span class="palette-item__label">{{ item.label }}</span>
@@ -291,6 +297,31 @@
                           </svg>
                         </div>
                         <p class="bp-video__placeholder">Pega una URL de YouTube en el panel derecho</p>
+                      }
+                    </div>
+                  }
+                  @case ('slides') {
+                    <div class="bp-video">
+                      @if ($any(block).data.canvaUrl && getCanvaEmbedUrl($any(block).data.canvaUrl); as embedUrl) {
+                        <div class="bp-video__player">
+                          <iframe
+                            [src]="embedUrl"
+                            frameborder="0"
+                            allow="fullscreen"
+                            allowfullscreen
+                          ></iframe>
+                        </div>
+                        @if ($any(block).data.title) {
+                          <p class="bp-video__title">{{ $any(block).data.title }}</p>
+                        }
+                      } @else {
+                        <div class="bp-video__icon">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="2" y="4" width="20" height="14" rx="2"/>
+                            <line x1="2" y1="20" x2="22" y2="20"/>
+                          </svg>
+                        </div>
+                        <p class="bp-video__placeholder">Pega un link de Canva en el panel derecho</p>
                       }
                     </div>
                   }
@@ -485,6 +516,28 @@
                   placeholder="https://www.youtube.com/watch?v=..."
                 />
                 <span class="prop-hint">Pega la URL completa del video</span>
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Título (opcional)</label>
+                <input
+                  class="prop-input"
+                  type="text"
+                  [value]="$any(block).data.title ?? ''"
+                  (input)="updateProp('title', strVal($event))"
+                />
+              </div>
+            }
+            @case ('slides') {
+              <div class="prop-group">
+                <label class="prop-label">Link de Canva</label>
+                <input
+                  class="prop-input"
+                  type="text"
+                  [value]="$any(block).data.canvaUrl ?? ''"
+                  (input)="updateProp('canvaUrl', strVal($event))"
+                  placeholder="https://www.canva.com/design/DAFxxxxx/view"
+                />
+                <span class="prop-hint">El diseño debe tener acceso "Cualquiera puede ver"</span>
               </div>
               <div class="prop-group">
                 <label class="prop-label">Título (opcional)</label>

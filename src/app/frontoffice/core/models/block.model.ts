@@ -1,6 +1,6 @@
 import { Article } from './article.model';
 
-export type BlockType = 'hero' | 'text' | 'image' | 'cards-grid' | 'cta' | 'gallery-grid' | 'video';
+export type BlockType = 'hero' | 'text' | 'image' | 'cards-grid' | 'cta' | 'gallery-grid' | 'video' | 'slides';
 
 /** Colores opcionales por bloque; omitidos en JSON si no se configuran. */
 export interface BlockColorProps {
@@ -115,7 +115,8 @@ export type PageBlock =
   | CardsGridBlock
   | CtaBlock
   | GalleryBlock
-  | VideoBlock;
+  | VideoBlock
+  | SlidesBlock;
 
 export interface Block {
   id: string;
@@ -172,4 +173,12 @@ export interface CtaBlockData {
 export interface VideoBlockData {
   url: string;
   title?: string;
+}
+
+export interface SlidesBlock extends BaseBlock {
+  type: 'slides';
+  data: {
+    title?: string;
+    canvaUrl: string;
+  };
 }
