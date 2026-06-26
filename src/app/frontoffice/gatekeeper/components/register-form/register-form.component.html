@@ -1,7 +1,7 @@
 <div class="register-form" [formGroup]="form">
+
   <div class="form-header">
     <img src="/images/logo-ug.png" alt="Universidad de Guayaquil" class="logo-ug" />
-    <span class="logo-divider">×</span>
     <img src="/images/logo-alianza.png" alt="Misión Alianza" class="logo-alianza" />
     <div class="form-header-text">
       <strong>Universidad de Guayaquil</strong>
@@ -9,88 +9,99 @@
     </div>
   </div>
 
-  <h1>Bienvenido al Portal</h1>
+  <h1 class="form-title">Bienvenido al Portal</h1>
   <p class="form-subtitle">Completa los siguientes datos para continuar.</p>
 
-  <div class="error-banner" *ngIf="error()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="8" x2="12" y2="12" />
-      <line x1="12" y1="16" x2="12.01" y2="16" />
-    </svg>
-    {{ error() }}
-  </div>
+  @if (error()) {
+    <div class="alert alert--error" role="alert">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ error() }}
+    </div>
+  }
 
   <!-- NOMBRES (OPCIONAL) -->
-  <div class="field">
-    <label>Nombres (opcional)</label>
+  <div class="form-group">
+    <label class="form-label" for="nombres">Nombres (opcional)</label>
     <input
+      id="nombres"
       type="text"
       formControlName="nombres"
+      class="form-input"
       placeholder="Tu nombre"
       autocomplete="given-name"
     />
   </div>
 
   <!-- EDAD (OBLIGATORIO) -->
-  <div class="field" [class.invalid]="isInvalid('edad')">
-    <label>Edad</label>
+  <div class="form-group" [class.form-group--error]="isInvalid('edad')">
+    <label class="form-label" for="edad">Edad</label>
     <input
+      id="edad"
       type="text"
       formControlName="edad"
+      class="form-input"
       placeholder="Tu edad"
       (keypress)="soloNumeros($event)"
       maxlength="3"
       inputmode="numeric"
     />
-    <span class="field-error" *ngIf="isInvalid('edad')">Ingresa una edad válida</span>
+    @if (isInvalid('edad')) {
+      <span class="form-error">Ingresa una edad válida</span>
+    }
   </div>
 
   <!-- SEXO (OBLIGATORIO) -->
-  <div class="field" [class.invalid]="isInvalid('sexo')">
-    <label>Sexo</label>
+  <div class="form-group" [class.form-group--error]="isInvalid('sexo')">
+    <label class="form-label">Sexo</label>
     <div class="sexo-options">
-      <!-- Femenino -->
       <button
         type="button"
         class="sexo-btn"
-        [class.sexo-btn--active-femenino]="form.get('sexo')?.value === 'femenino'"
+        [class.sexo-btn--active]="form.get('sexo')?.value === 'femenino'"
         (click)="form.get('sexo')?.setValue('femenino')"
       >
         Femenino
       </button>
-
-      <!-- Masculino -->
       <button
         type="button"
         class="sexo-btn"
-        [class.sexo-btn--active-masculino]="form.get('sexo')?.value === 'masculino'"
+        [class.sexo-btn--active]="form.get('sexo')?.value === 'masculino'"
         (click)="form.get('sexo')?.setValue('masculino')"
       >
         Masculino
       </button>
-
-      <!-- Otro -->
       <button
         type="button"
         class="sexo-btn"
-        [class.sexo-btn--active-otro]="form.get('sexo')?.value === 'otro'"
+        [class.sexo-btn--active]="form.get('sexo')?.value === 'otro'"
         (click)="form.get('sexo')?.setValue('otro')"
       >
         Otro
       </button>
     </div>
-    <span class="field-error" *ngIf="isInvalid('sexo')">Selecciona una opción</span>
+    @if (isInvalid('sexo')) {
+      <span class="form-error">Selecciona una opción</span>
+    }
   </div>
 
   <button
     type="button"
     class="btn-submit"
-    [class.loading]="loading()"
     [disabled]="loading()"
     (click)="onSubmit()"
   >
-    <span *ngIf="!loading()">Ingresar al Portal →</span>
-    <span *ngIf="loading()" class="btn-spinner"></span>
+    @if (loading()) {
+      <span class="spinner"></span>
+      Verificando...
+    } @else {
+      Ingresar al Portal
+    }
   </button>
+
+  <a routerLink="/admin/login" class="btn-portal">
+    Ir al portal administrativo
+  </a>
+
 </div>
