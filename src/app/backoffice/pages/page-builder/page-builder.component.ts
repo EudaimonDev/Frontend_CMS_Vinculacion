@@ -91,13 +91,14 @@ export class PageBuilderComponent implements OnInit {
   }
 
   palette: BlockPaletteItem[] = [
-    { type: 'hero', label: 'Titulo', icon: 'hero' },
-    { type: 'text', label: 'Texto', icon: 'text' },
-    { type: 'image', label: 'Imagen', icon: 'image' },
-    { type: 'cards-grid', label: 'Tarjetas', icon: 'cards' },
-    { type: 'cta', label: 'Call to Action', icon: 'cta' },
-    { type: 'video', label: 'Video YouTube', icon: 'video' },
-  ];
+  { type: 'hero', label: 'Titulo', icon: 'hero' },
+  { type: 'text', label: 'Texto', icon: 'text' },
+  { type: 'image', label: 'Imagen', icon: 'image' },
+  { type: 'cards-grid', label: 'Tarjetas', icon: 'cards' },
+  { type: 'cta', label: 'Call to Action', icon: 'cta' },
+  { type: 'video', label: 'Video YouTube', icon: 'video' },
+  { type: 'slides', label: 'Diapositivas', icon: 'slides' },
+];
 
   readonly heroColorFields = HERO_COLOR_FIELDS;
   readonly textColorFields = TEXT_COLOR_FIELDS;
@@ -318,8 +319,24 @@ export class PageBuilderComponent implements OnInit {
             title: '',
           },
         };
+      case 'slides':
+        return {
+          id, type, visible: true, order,
+          data: {
+            title: '',
+            canvaUrl: '',
+          },
+        };
       default:
         throw new Error(`Tipo de bloque desconocido: ${type}`);
     }
   }
+
+  getCanvaEmbedUrl(url: string): SafeResourceUrl | null {
+  const match = url?.match(/canva\.com\/design\/([a-zA-Z0-9_-]+)/);
+  if (!match) return null;
+  return this.sanitizer.bypassSecurityTrustResourceUrl(
+    `https://www.canva.com/design/${match[1]}/view?embed`,
+  );
+}
 }

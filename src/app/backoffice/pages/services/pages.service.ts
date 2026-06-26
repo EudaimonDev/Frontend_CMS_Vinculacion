@@ -20,6 +20,13 @@ export class PagesService {
   });
 }
 
+  getCanvaEmbedUrl(url: string): string | null {
+    if (!url) return null;
+    const match = url.match(/canva\.com\/design\/([a-zA-Z0-9_-]+)/);
+    if (!match) return null;
+    return `https://www.canva.com/design/${match[1]}/view?embed`;
+  }
+
   private loadAll(): void {
     this.http
       .get<any>(`${this.api}/Articles/admin`, { params: { page: 1, pageSize: 100 } })
@@ -257,6 +264,17 @@ export class PagesService {
               </div>
             </div>`;
           }
+          case 'slides':
+            const canvaMatch = data.canvaUrl?.match(/canva\.com\/design\/([a-zA-Z0-9_-]+)/);
+            if (!canvaMatch) return '';
+            const canvaEmbed = `https://www.canva.com/design/${canvaMatch[1]}/view?embed`;
+            return `<div class="canva-embed" style="position:relative;width:100%;height:0;padding-top:56.2225%;
+                box-shadow:0 2px 8px 0 rgba(63,69,81,0.16);margin-top:1.6em;margin-bottom:0.9em;overflow:hidden;
+                border-radius:8px;">
+              <iframe loading="lazy" style="position:absolute;width:100%;height:100%;top:0;left:0;border:none;padding:0;margin:0;"
+                src="${canvaEmbed}" allowfullscreen="allowfullscreen" allow="fullscreen">
+              </iframe>
+            </div>`;
           case 'cta':
             return `<div class="article-block article-block--cta" style="padding:4rem 2rem;text-align:center;background:#f0f4f8;width:100%;${textContain}">
               <h2>${data.title}</h2>
