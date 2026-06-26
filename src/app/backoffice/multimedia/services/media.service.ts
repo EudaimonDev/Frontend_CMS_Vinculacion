@@ -18,6 +18,7 @@ export class MediaService {
   });
 
   readonly filters       = this._filters.asReadonly();
+  readonly items         = this._items.asReadonly();
   readonly selectedItem  = signal<MediaItem | null>(null);
   readonly totalItems    = computed(() => this._items().length);
 
@@ -61,8 +62,8 @@ export class MediaService {
 
   return new Promise((resolve, reject) => {
     this.http.post<any[]>(url, formData).subscribe({
-      next: medias => {
-        const items = medias.map(this.mapToMediaItem);
+        next: medias => {
+        const items = medias.map(m => this.mapToMediaItem(m));
         this._items.update(list => [...items, ...list]);
         resolve(items);
       },
@@ -75,29 +76,45 @@ export class MediaService {
     this.http
       .get<any[]>(`${this.api}/Media/admin`, { params: { page: 1, pageSize: 100 } })
       .subscribe({
-        next: items => this._items.set(items.map(this.mapToMediaItem)),
+        next: items => this._items.set(items.map(i => this.mapToMediaItem(i))),
         error: () => this._items.set([])
       });
   }
 
   async add(dto: CreateMediaItemDto): Promise<MediaItem> {
-    // Convertir base64 a File para subir al backend
     const file = this.base64ToFile(dto.url, dto.name, dto.mimeType);
+    return this.uploadFile(file);
+  }
+
+  /** Subida directa de archivo al wwwroot/uploads vía API. */
+  uploadFile(file: File, articleId?: number): Promise<MediaItem> {
     const formData = new FormData();
     formData.append('file', file);
 
+    let url = `${this.api}/Media/admin/upload`;
+    if (articleId) url += `?articleId=${articleId}`;
+
     return new Promise((resolve, reject) => {
-      this.http
-        .post<any>(`${this.api}/Media/admin/upload`, formData)
-        .subscribe({
-          next: media => {
-            const item = this.mapToMediaItem(media);
-            this._items.update(list => [item, ...list]);
-            resolve(item);
-          },
-          error: reject
-        });
+      this.http.post<any>(url, formData).subscribe({
+        next: media => {
+          const item = this.mapToMediaItem(media);
+          this._items.update(list => [item, ...list]);
+          resolve(item);
+        },
+        error: reject,
+      });
     });
+  }
+
+  resolveMediaUrl(filePath: string): string {
+    if (!filePath) return '';
+    if (filePath.startsWith('http')) return filePath;
+    const base = this.api.replace(/\/api\/?$/, '');
+    return `${base}${filePath.startsWith('/') ? filePath : `/${filePath}`}`;
+  }
+
+  reload(): void {
+    this.loadAll();
   }
 
   update(id: string, patch: Partial<Pick<MediaItem, 'name' | 'tags'>>): void {
@@ -135,9 +152,7 @@ export class MediaService {
 
   private mapToMediaItem(media: any): MediaItem {
   const filePath = media.filePath ?? media.url ?? '';
-  const fullUrl = filePath.startsWith('http')
-    ? filePath
-    : `https://localhost:7218${filePath}`;
+  const fullUrl = this.resolveMediaUrl(filePath);
 
   return {
     id:        media.mediaId?.toString() ?? media.id,

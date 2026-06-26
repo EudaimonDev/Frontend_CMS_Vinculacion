@@ -12,4 +12,5 @@ export interface Article {
   featured?: boolean;
   imageUrl?: string;
   contentHtml?: string;
+  blocksJson?: string;
 }

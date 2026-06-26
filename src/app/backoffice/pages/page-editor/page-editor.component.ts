@@ -12,6 +12,9 @@ import { CardsEditorComponent } from '../../shared/components/cards-editor/cards
 import {
   applyColorPatch,
   CARDS_COLOR_FIELDS,
+  defaultCardsColorData,
+  defaultHeroColorData,
+  defaultTextColorData,
   HERO_COLOR_FIELDS,
   TEXT_COLOR_FIELDS,
 } from '../../shared/utils/block-color.util';
@@ -51,7 +54,6 @@ export class PageEditorComponent implements OnInit {
 
   form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(3)]],
-    slug: ['', Validators.required],
     status: ['draft' as 'published' | 'draft' | 'archived'],
     description: [''],
     categoryId: [null as number | null],
@@ -60,7 +62,7 @@ export class PageEditorComponent implements OnInit {
 
   blockOptions: BlockOption[] = [
     { type: 'hero', label: 'Titulo', description: 'Banner principal con título y CTA', icon: 'hero' },
-    { type: 'text', label: 'Texto', description: 'Bloque de contenido HTML', icon: 'text' },
+    { type: 'text', label: 'Párrafo', description: 'Bloque de contenido HTML', icon: 'text' },
     { type: 'slides', icon: 'slides', label: 'Diapositivas', description: 'Inserta una presentación de Canva' },
     {
       type: 'image',
@@ -93,7 +95,7 @@ export class PageEditorComponent implements OnInit {
   readonly cardsColorFields = CARDS_COLOR_FIELDS;
 
   headerTitle = computed(() =>
-    this.mode() === 'new' ? 'Nueva página' : `Editar: ${this.form.value.title || '...'}`,
+    this.mode() === 'new' ? 'Nueva página' : `Editar página`,
   );
 
   breadcrumbs = computed(() => [
@@ -125,7 +127,6 @@ export class PageEditorComponent implements OnInit {
 
           this.form.patchValue({
             title: article.title,
-            slug: (article.slug ?? '').replace(/^\/+/, ''),
             status: article.statusName === 'Published' ? 'published' : 'draft',
             description: article.excerpt ?? '',
             categoryId: matchedCat?.categoryId ?? null,
@@ -141,12 +142,6 @@ export class PageEditorComponent implements OnInit {
         }
       });
   }
-
-  this.form.get('title')!.valueChanges.subscribe((title) => {
-    if (this.mode() === 'new' && title) {
-      this.form.get('slug')!.setValue(this.service.slugify(title), { emitEvent: false });
-    }
-  });
 }
 
   // ── Bloques ──────────────────────────────────────────────────
@@ -212,7 +207,6 @@ export class PageEditorComponent implements OnInit {
   if (this.mode() === 'new') {
     const body = {
       title: formData.title,
-      slug: (formData.slug ?? '').replace(/^\/+/, ''),  // ← quita el / inicial
       contentHtml,
       blocksJson: JSON.stringify(this.blocks()),
       excerpt: formData.description ?? '',
@@ -238,17 +232,14 @@ export class PageEditorComponent implements OnInit {
   } else {
   const body = {
     title: formData.title,
-    slug: (formData.slug ?? '').replace(/^\/+/, ''),  // ← quita el / inicial
     contentHtml,
     blocksJson: JSON.stringify(this.blocks()),
     excerpt: formData.description ?? '',
     emoji: '📄',
     readingTime: 1,
     featured: formData.featured ?? false,
-    categoryIds: formData.categoryId ? [Number(formData.categoryId)] : [] as number[]  // ← fix
+    categoryIds: formData.categoryId ? [Number(formData.categoryId)] : [] as number[]
   };
-  console.log('PUT body:', JSON.stringify(body, null, 2));
-  console.log('featured value:', this.form.get('featured')?.value);
   this.http.put(`${this.api}/Articles/admin/${this.pageId()}`, body).subscribe({
     next: () => {
       if (formData.status !== undefined) {
@@ -285,7 +276,14 @@ export class PageEditorComponent implements OnInit {
           type,
           visible: true,
           order,
-          data: { title: 'Nuevo titulo', subtitle: '', ctaLabel: '', ctaRoute: '/', overlay: false },
+          data: {
+            title: 'Nuevo titulo',
+            subtitle: '',
+            ctaLabel: '',
+            ctaRoute: '/',
+            overlay: false,
+            ...defaultHeroColorData(),
+          },
         };
       case 'text':
         return {
@@ -293,7 +291,12 @@ export class PageEditorComponent implements OnInit {
           type,
           visible: true,
           order,
-          data: { title: '', html: '<p>Contenido aquí...</p>', align: 'left' },
+          data: {
+            title: '',
+            html: '<p>Contenido aquí...</p>',
+            align: 'left',
+            ...defaultTextColorData(),
+          },
         };
       case 'image':
         return {
@@ -317,6 +320,7 @@ export class PageEditorComponent implements OnInit {
               { title: 'Servicio 1', description: 'Descripción del servicio.' },
               { title: 'Servicio 2', description: 'Descripción del servicio.' },
             ],
+            ...defaultCardsColorData(),
           },
         };
       case 'cta':

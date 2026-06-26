@@ -15,6 +15,10 @@ export interface BlockColorProps {
   ctaTextColor?: string;
 }
 
+export type BlockAlign = 'left' | 'center' | 'right';
+export type HeroTitleLevel = 'h1' | 'h2' | 'h3';
+export type HeroSubtitleSize = 'sm' | 'md' | 'lg';
+
 export interface BaseBlock {
   id: string;
   type: BlockType;
@@ -28,6 +32,8 @@ export interface HeroBlock extends BaseBlock {
   data: {
     title: string;
     subtitle?: string;
+    titleLevel?: HeroTitleLevel;
+    subtitleSize?: HeroSubtitleSize;
     backgroundImage?: string;
     ctaLabel?: string;
     ctaRoute?: string;
@@ -53,6 +59,11 @@ export interface ImageBlock extends BaseBlock {
     alt: string;
     caption?: string;
     fullWidth?: boolean;
+    align?: BlockAlign;
+    width?: number;
+    height?: number;
+    naturalWidth?: number;
+    naturalHeight?: number;
   };
 }
 
@@ -95,6 +106,15 @@ export interface VideoBlock extends BaseBlock {
   data: {
     url: string;
     title?: string;
+  };
+}
+
+// ── Slides (Canva) ────────────────────────────
+export interface SlidesBlock extends BaseBlock {
+  type: 'slides';
+  data: {
+    title?: string;
+    canvaUrl: string;
   };
 }
 
@@ -161,6 +181,11 @@ export interface ImageBlockData {
   src: string;
   alt: string;
   caption?: string;
+  align?: BlockAlign;
+  width?: number;
+  height?: number;
+  naturalWidth?: number;
+  naturalHeight?: number;
 }
 
 export interface CtaBlockData {
@@ -173,12 +198,4 @@ export interface CtaBlockData {
 export interface VideoBlockData {
   url: string;
   title?: string;
-}
-
-export interface SlidesBlock extends BaseBlock {
-  type: 'slides';
-  data: {
-    title?: string;
-    canvaUrl: string;
-  };
 }

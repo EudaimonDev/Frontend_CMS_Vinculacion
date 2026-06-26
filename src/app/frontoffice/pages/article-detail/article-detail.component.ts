@@ -6,6 +6,7 @@ import { Article } from '../../core/models/article.model';
 import { ReadingTimePipe } from '../../core/pipes/reading-time.pipe';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { blocksToHtml } from '../../../backoffice/shared/utils/block-html.util';
 
 @Component({
   selector: 'app-article-detail',
@@ -32,13 +33,28 @@ export class ArticleDetailComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.cms.getArticleById(id).subscribe(article => {
       this.article.set(article);
-      if (article?.contentHtml) {
-        this.safeContent.set(
-          this.sanitizer.bypassSecurityTrustHtml(article.contentHtml)
-        );
+      const html = this.resolveArticleHtml(article);
+      if (html) {
+        this.safeContent.set(this.sanitizer.bypassSecurityTrustHtml(html));
       }
       this.loading.set(false);
     });
+  }
+
+  private resolveArticleHtml(article: Article | undefined): string {
+    if (!article) return '';
+
+    if (article.blocksJson) {
+      try {
+        const blocks = JSON.parse(article.blocksJson);
+        const generated = blocksToHtml(blocks);
+        if (generated) return generated;
+      } catch {
+        /* usar contentHtml como respaldo */
+      }
+    }
+
+    return article.contentHtml ?? '';
   }
 
   shareTwitter(): void {

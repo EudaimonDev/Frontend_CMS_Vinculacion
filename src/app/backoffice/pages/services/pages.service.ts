@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Page, PageFormData } from '../models/page.model';
 import { PageBlock } from '../../../frontoffice/core/models/block.model';
 import { environment } from '../../../../environments/environment';
+import { blocksToHtml as generateBlocksHtml } from '../../shared/utils/block-html.util';
 
 @Injectable({ providedIn: 'root' })
 export class PagesService {
@@ -142,152 +143,8 @@ export class PagesService {
     );
   }
 
-  blocksToHtml(blocks: any[]): string {
-    const textContain =
-      'max-width:100%;overflow-wrap:anywhere;word-break:break-word;overflow-x:hidden;box-sizing:border-box';
-    const heroTitleStyle =
-      'overflow-wrap:anywhere;word-break:break-word;margin:0 0 0.5rem;font-size:clamp(1.5rem,3vw,2.25rem);font-weight:800;line-height:1.2';
-
-    return blocks
-      .filter((b: any) => b.visible)
-      .sort((a: any, b: any) => a.order - b.order)
-      .map((b: any) => {
-        const data = b.data;
-        switch (b.type) {
-          case 'text': {
-            const align = data.align ?? 'left';
-            const wrapStyles = [
-              textContain,
-              'display:block',
-              'width:100%',
-              'max-width:860px',
-              'margin:0 auto',
-              'padding:3rem 2rem',
-              'box-sizing:border-box',
-              `text-align:${align}`,
-              data.backgroundColor ? `background-color:${data.backgroundColor}` : '',
-              data.textColor ? `color:${data.textColor}` : '',
-            ].filter(Boolean).join(';');
-            const titleStyle = [
-              data.titleColor ? `color:${data.titleColor}` : '',
-              'overflow-wrap:anywhere;word-break:break-word',
-              'font-size:1.875rem;font-weight:700;margin:0 0 1rem',
-            ].filter(Boolean).join(';');
-            const titleHtml = data.title
-              ? `<h2 style="${titleStyle}">${data.title}</h2>`
-              : '';
-            const body = data.html ?? '';
-            return `<div class="article-block article-block--text" style="${wrapStyles}">${titleHtml}${body}</div>`;
-          }
-          case 'video': {
-            const videoId = data.url?.match(
-              /(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/
-            )?.[1];
-            if (!videoId) return '';
-            const titleHtml = data.title
-              ? `<h3 class="video-embed__title" style="margin:1rem 0 0;font-size:1.125rem;font-weight:600;color:#1e293b;text-align:center;line-height:1.4">${data.title}</h3>`
-              : '';
-            return `<div class="article-block article-block--video" style="display:block;width:70%;max-width:70%;margin:2rem auto;padding:0 1rem;box-sizing:border-box">
-              <div class="video-embed" style="position:relative;width:100%;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;background:#000">
-                <iframe src="https://www.youtube.com/embed/${videoId}"
-                  style="position:absolute;top:0;left:0;width:100%;height:100%;border:0"
-                  frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen></iframe>
-              </div>
-              ${titleHtml}
-            </div>`;
-          }
-          case 'image': {
-            const fullWidth = !!data.fullWidth;
-            const wrapClass = fullWidth
-              ? 'article-block article-block--image article-block--image-full'
-              : 'article-block article-block--image';
-            const wrapStyles = fullWidth
-              ? 'margin:2rem 0;width:100%;padding:0;box-sizing:border-box'
-              : 'margin:2rem auto;width:100%;max-width:860px;padding:0 2rem;box-sizing:border-box';
-            const imgStyles =
-              'width:100%;max-width:100%;height:auto;border-radius:8px;display:block;object-fit:contain';
-            const captionHtml = data.caption
-              ? `<figcaption style="margin-top:0.5rem;text-align:center;font-size:0.875rem;color:#64748b">${data.caption}</figcaption>`
-              : '';
-            return `<figure class="${wrapClass}" style="${wrapStyles}">
-              <img src="${data.src}" alt="${data.alt ?? ''}" style="${imgStyles}" />
-              ${captionHtml}
-            </figure>`;
-          }
-          case 'hero': {
-            const bgColor = data.backgroundColor ? `background-color:${data.backgroundColor};` : '';
-            const titleStyle = data.titleColor ? `color:${data.titleColor};` : 'color:white;';
-            const subtitleStyle = data.subtitleColor
-              ? `color:${data.subtitleColor};`
-              : 'color:white;';
-            const ctaStyle = [
-              data.ctaBackgroundColor ? `background:${data.ctaBackgroundColor};` : 'background:#fff;',
-              data.ctaTextColor ? `color:${data.ctaTextColor};` : 'color:#1e5fa8;',
-              'display:inline-block;padding:0.625rem 1.5rem;border-radius:999px;text-decoration:none;font-weight:700',
-            ].join('');
-            return `<div class="article-block article-block--hero" style="position:relative;padding:2.5rem 3rem;overflow:hidden;min-height:220px;width:100%;${textContain};${bgColor}">
-              ${data.backgroundImage ? `
-                <img src="${data.backgroundImage}"
-                  style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0"
-                  alt="hero background" />
-                <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:1"></div>
-              ` : ''}
-              <div style="position:relative;z-index:2;max-width:100%;min-width:0">
-                <h1 style="${titleStyle}${heroTitleStyle}">${data.title ?? ''}</h1>
-                ${data.subtitle ? `<p style="${subtitleStyle}text-shadow:0 1px 3px rgba(0,0,0,0.5);overflow-wrap:anywhere;word-break:break-word;margin:0 0 1.25rem">${data.subtitle}</p>` : ''}
-                ${data.ctaLabel ? `<a href="${data.ctaRoute ?? '#'}" style="${ctaStyle}">${data.ctaLabel}</a>` : ''}
-              </div>
-            </div>`;
-          }
-          case 'cards-grid': {
-            const sectionStyle = data.backgroundColor ? `background-color:${data.backgroundColor};` : '';
-            const titleStyle = data.titleColor ? `color:${data.titleColor};` : '';
-            const subtitleStyle = data.subtitleColor ? `color:${data.subtitleColor};` : '';
-            const cardStyle = [
-              'padding:1rem;border-radius:8px',
-              data.cardBackgroundColor ? `background:${data.cardBackgroundColor};` : '',
-              data.cardBorderColor ? `border:1px solid ${data.cardBorderColor};` : 'border:1px solid #eee;',
-              data.cardTextColor ? `color:${data.cardTextColor};` : '',
-              textContain,
-            ].filter(Boolean).join(';');
-            return `<div class="article-block article-block--cards" style="${sectionStyle}${textContain};padding:2.5rem 2rem;width:100%">
-              ${data.title ? `<h2${titleStyle ? ` style="${titleStyle}"` : ''}>${data.title}</h2>` : ''}
-              ${data.subtitle ? `<p${subtitleStyle ? ` style="${subtitleStyle}"` : ''}>${data.subtitle}</p>` : ''}
-              <div style="display:grid;grid-template-columns:repeat(${data.columns ?? 2},1fr);gap:1rem;margin:1rem 0">
-                ${(data.cards ?? []).map((c: any) => `
-                  <div style="${cardStyle}">
-                    <strong>${c.title}</strong>
-                    <p>${c.description}</p>
-                  </div>`).join('')}
-              </div>
-            </div>`;
-          }
-          case 'slides':
-            const canvaMatch = data.canvaUrl?.match(/canva\.com\/design\/([a-zA-Z0-9_-]+)/);
-            if (!canvaMatch) return '';
-            const canvaEmbed = `https://www.canva.com/design/${canvaMatch[1]}/view?embed`;
-            return `<div class="canva-embed" style="position:relative;width:100%;height:0;padding-top:56.2225%;
-                box-shadow:0 2px 8px 0 rgba(63,69,81,0.16);margin-top:1.6em;margin-bottom:0.9em;overflow:hidden;
-                border-radius:8px;">
-              <iframe loading="lazy" style="position:absolute;width:100%;height:100%;top:0;left:0;border:none;padding:0;margin:0;"
-                src="${canvaEmbed}" allowfullscreen="allowfullscreen" allow="fullscreen">
-              </iframe>
-            </div>`;
-          case 'cta':
-            return `<div class="article-block article-block--cta" style="padding:4rem 2rem;text-align:center;background:#f0f4f8;width:100%;${textContain}">
-              <h2>${data.title}</h2>
-              ${data.description ? `<p>${data.description}</p>` : ''}
-              <a href="${data.primaryRoute}" style="display:inline-block;padding:0.75rem 1.5rem;background:#1e5fa8;color:white;border-radius:6px;text-decoration:none">
-                ${data.primaryLabel}
-              </a>
-            </div>`;
-          default:
-            return '';
-        }
-      })
-      .join('\n');
+  blocksToHtml(blocks: PageBlock[]): string {
+    return generateBlocksHtml(blocks);
   }
 
   private mapArticleToPage(article: any): Page {

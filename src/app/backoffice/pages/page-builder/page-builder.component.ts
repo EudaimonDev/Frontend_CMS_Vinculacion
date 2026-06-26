@@ -14,6 +14,9 @@ import { CardsEditorComponent } from '../../shared/components/cards-editor/cards
 import {
   applyColorPatch,
   CARDS_COLOR_FIELDS,
+  defaultCardsColorData,
+  defaultHeroColorData,
+  defaultTextColorData,
   HERO_COLOR_FIELDS,
   TEXT_COLOR_FIELDS,
 } from '../../shared/utils/block-color.util';
@@ -85,21 +88,87 @@ export class PageBuilderComponent implements OnInit {
 
   onImageSelected(url: string): void {
     const target = this.imagePickerTarget();
-    if (target) this.updateProp(target, url);
+    if (target) {
+      this.updateProp(target, url);
+      if (target === 'src') this.syncImageDimensionsFromSrc(url);
+    }
     this.showImagePicker.set(false);
     this.imagePickerTarget.set(null);
   }
 
+  onImageSrcChange(event: Event): void {
+    const url = this.strVal(event);
+    this.updateProp('src', url);
+    this.syncImageDimensionsFromSrc(url);
+  }
+
+  onImageDimensionChange(changed: 'width' | 'height', raw: string): void {
+    const id = this.selectedId();
+    if (!id) return;
+    const value = Math.max(1, Math.round(Number(raw)) || 1);
+
+    this.blocks.update(arr =>
+      arr.map(b => {
+        if (b.id !== id || b.type !== 'image') return b;
+        const data = { ...(b as any).data };
+        const nw = data.naturalWidth || data.width || 1200;
+        const nh = data.naturalHeight || data.height || 400;
+        const ratio = nw / nh;
+
+        if (changed === 'width') {
+          data.width = value;
+          data.height = Math.max(1, Math.round(value / ratio));
+        } else {
+          data.height = value;
+          data.width = Math.max(1, Math.round(value * ratio));
+        }
+        return { ...b, data };
+      }),
+    );
+  }
+
+  private syncImageDimensionsFromSrc(url: string): void {
+    if (!url) return;
+    const id = this.selectedId();
+    if (!id) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const nw = img.naturalWidth;
+      const nh = img.naturalHeight;
+      if (!nw || !nh) return;
+
+      this.blocks.update(arr =>
+        arr.map(b => {
+          if (b.id !== id || b.type !== 'image') return b;
+          const data = { ...(b as any).data };
+          const width = data.width && data.width > 0 ? data.width : nw;
+          const height = Math.max(1, Math.round(width * nh / nw));
+          return {
+            ...b,
+            data: {
+              ...data,
+              naturalWidth: nw,
+              naturalHeight: nh,
+              width,
+              height,
+            },
+          };
+        }),
+      );
+    };
+    img.src = url;
+  }
+
   palette: BlockPaletteItem[] = [
   { type: 'hero', label: 'Titulo', icon: 'hero' },
-  { type: 'text', label: 'Texto', icon: 'text' },
+  { type: 'text', label: 'Párrafo', icon: 'text' },
   { type: 'image', label: 'Imagen', icon: 'image' },
   { type: 'cards-grid', label: 'Tarjetas', icon: 'cards' },
   { type: 'cta', label: 'Call to Action', icon: 'cta' },
   { type: 'video', label: 'Video YouTube', icon: 'video' },
   { type: 'slides', label: 'Diapositivas', icon: 'slides' },
-];
-
+  ];
   readonly heroColorFields = HERO_COLOR_FIELDS;
   readonly textColorFields = TEXT_COLOR_FIELDS;
   readonly cardsColorFields = CARDS_COLOR_FIELDS;
@@ -151,8 +220,17 @@ export class PageBuilderComponent implements OnInit {
     this.blocks.set(arr.map((b, i) => ({ ...b, order: i + 1 })));
   }
 
+  moveBlock(index: number, dir: -1 | 1): void {
+    const arr = [...this.blocks()];
+    const target = index + dir;
+    if (target < 0 || target >= arr.length) return;
+    [arr[index], arr[target]] = [arr[target], arr[index]];
+    this.blocks.set(arr.map((b, i) => ({ ...b, order: i + 1 })));
+  }
+
   selectBlock(id: string): void {
-    this.selectedId.set(this.selectedId() === id ? null : id);
+    this.selectedId.set(id);
+    document.getElementById(`block-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   deselect(): void {
@@ -263,9 +341,12 @@ export class PageBuilderComponent implements OnInit {
           data: {
             title: 'Nuevo titulo',
             subtitle: 'Agrega un subtítulo aquí',
+            titleLevel: 'h1',
+            subtitleSize: 'md',
             ctaLabel: 'Ver más',
             ctaRoute: '/',
             overlay: false,
+            ...defaultHeroColorData(),
           },
         };
       case 'text':
@@ -275,6 +356,7 @@ export class PageBuilderComponent implements OnInit {
             title: 'Título de sección',
             html: '<p>Escribe tu contenido aquí...</p>',
             align: 'left',
+            ...defaultTextColorData(),
           },
         };
       case 'image':
@@ -285,6 +367,11 @@ export class PageBuilderComponent implements OnInit {
             alt: 'Imagen',
             caption: '',
             fullWidth: false,
+            align: 'center',
+            width: 1200,
+            height: 400,
+            naturalWidth: 1200,
+            naturalHeight: 400,
           },
         };
       case 'cards-grid':
@@ -298,6 +385,7 @@ export class PageBuilderComponent implements OnInit {
               { title: 'Servicio 1', description: 'Descripción del servicio.' },
               { title: 'Servicio 2', description: 'Descripción del servicio.' },
             ],
+            ...defaultCardsColorData(),
           },
         };
       case 'cta':
@@ -333,10 +421,10 @@ export class PageBuilderComponent implements OnInit {
   }
 
   getCanvaEmbedUrl(url: string): SafeResourceUrl | null {
-  const match = url?.match(/canva\.com\/design\/([a-zA-Z0-9_-]+)/);
-  if (!match) return null;
-  return this.sanitizer.bypassSecurityTrustResourceUrl(
-    `https://www.canva.com/design/${match[1]}/view?embed`,
-  );
-}
+    const match = url?.match(/canva\.com\/design\/([a-zA-Z0-9_-]+)/);
+    if (!match) return null;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://www.canva.com/design/${match[1]}/view?embed`,
+    );
+  }
 }

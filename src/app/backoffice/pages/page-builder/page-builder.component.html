@@ -142,6 +142,99 @@
           </div>
         </label>
       </div>
+
+      <div class="builder-palette__blocks">
+        <p class="builder-palette__label">Bloques de contenido</p>
+
+        @if (blocks().length === 0) {
+          <p class="blocks-list-empty">Sin bloques en esta página.</p>
+        } @else {
+          <div
+            cdkDropList
+            class="blocks-list"
+            [cdkDropListData]="blocks()"
+            (cdkDropListDropped)="onDrop($event)"
+          >
+            @for (block of blocks(); track block.id; let i = $index; let last = $last) {
+              <div
+                cdkDrag
+                class="blocks-list-item"
+                [class.blocks-list-item--hidden]="!block.visible"
+                [class.blocks-list-item--selected]="selectedId() === block.id"
+              >
+                <div cdkDragHandle class="blocks-list-item__handle" title="Arrastrar">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/>
+                    <circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
+                    <circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/>
+                  </svg>
+                </div>
+
+                <button
+                  type="button"
+                  class="blocks-list-item__info"
+                  (click)="selectBlock(block.id)"
+                >
+                  <span class="blocks-list-item__index">{{ i + 1 }}</span>
+                  <span class="blocks-list-item__type">{{ blockLabel(block.type) }}</span>
+                  @if (!block.visible) {
+                    <span class="blocks-list-item__badge">Oculto</span>
+                  }
+                </button>
+
+                <div class="blocks-list-item__actions">
+                  <button
+                    type="button"
+                    class="list-icon-btn"
+                    (click)="moveBlock(i, -1)"
+                    [disabled]="i === 0"
+                    title="Subir"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                  </button>
+                  <button
+                    type="button"
+                    class="list-icon-btn"
+                    (click)="moveBlock(i, 1)"
+                    [disabled]="last"
+                    title="Bajar"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  <button
+                    type="button"
+                    class="list-icon-btn"
+                    (click)="toggleVisibility(block.id, $event)"
+                    [title]="block.visible ? 'Ocultar' : 'Mostrar'"
+                  >
+                    @if (block.visible) {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    } @else {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                        <line x1="1" y1="1" x2="23" y2="23"/>
+                      </svg>
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    class="list-icon-btn list-icon-btn--danger"
+                    (click)="removeBlock(block.id, $event)"
+                    title="Eliminar"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
     </aside>
 
     <!-- ── Canvas central ── -->
@@ -161,6 +254,7 @@
           @for (block of blocks(); track block.id) {
             <div
               cdkDrag
+              [id]="'block-' + block.id"
               [cdkDragData]="block"
               class="block-wrapper"
               [class.block-wrapper--selected]="selectedId() === block.id"
@@ -217,9 +311,22 @@
                       [style.backgroundImage]="$any(block).data.backgroundImage ? 'url(' + $any(block).data.backgroundImage + ')' : null">
                       <div class="bp-hero__overlay" [class.bp-hero__overlay--on]="$any(block).data.overlay"></div>
                       <div class="bp-hero__content">
-                        <h2 class="bp-hero__title" [style.color]="$any(block).data.titleColor || null">{{ $any(block).data.title }}</h2>
+                        @switch ($any(block).data.titleLevel ?? 'h1') {
+                          @case ('h2') {
+                            <h2 class="bp-hero__title bp-hero__title--h2" [style.color]="$any(block).data.titleColor || null">{{ $any(block).data.title }}</h2>
+                          }
+                          @case ('h3') {
+                            <h3 class="bp-hero__title bp-hero__title--h3" [style.color]="$any(block).data.titleColor || null">{{ $any(block).data.title }}</h3>
+                          }
+                          @default {
+                            <h1 class="bp-hero__title bp-hero__title--h1" [style.color]="$any(block).data.titleColor || null">{{ $any(block).data.title }}</h1>
+                          }
+                        }
                         @if ($any(block).data.subtitle) {
-                          <p class="bp-hero__subtitle" [style.color]="$any(block).data.subtitleColor || null">{{ $any(block).data.subtitle }}</p>
+                          <p class="bp-hero__subtitle"
+                            [class.bp-hero__subtitle--sm]="$any(block).data.subtitleSize === 'sm'"
+                            [class.bp-hero__subtitle--lg]="$any(block).data.subtitleSize === 'lg'"
+                            [style.color]="$any(block).data.subtitleColor || null">{{ $any(block).data.subtitle }}</p>
                         }
                         @if ($any(block).data.ctaLabel) {
                           <span class="bp-hero__cta"
@@ -236,11 +343,20 @@
                   }
 
                   @case ('image') {
-                    <figure class="bp-image" [class.bp-image--full]="$any(block).data.fullWidth">
+                    <figure class="bp-image"
+                      [class.bp-image--full]="$any(block).data.fullWidth"
+                      [class.bp-image--align-left]="($any(block).data.align ?? 'center') === 'left'"
+                      [class.bp-image--align-center]="($any(block).data.align ?? 'center') === 'center'"
+                      [class.bp-image--align-right]="($any(block).data.align ?? 'center') === 'right'">
                       <img
                         class="bp-image__img"
                         [src]="$any(block).data.src"
                         [alt]="$any(block).data.alt"
+                        [style.width.px]="$any(block).data.fullWidth ? null : ($any(block).data.width || null)"
+                        [style.height.px]="$any(block).data.fullWidth ? null : ($any(block).data.height || null)"
+                        [style.aspect-ratio]="$any(block).data.fullWidth && $any(block).data.width && $any(block).data.height
+                          ? $any(block).data.width + ' / ' + $any(block).data.height
+                          : null"
                       />
                       @if ($any(block).data.caption) {
                         <figcaption class="bp-image__caption">{{ $any(block).data.caption }}</figcaption>
@@ -363,8 +479,36 @@
                 <input class="prop-input" type="text" [value]="$any(block).data.title" (input)="updateProp('title', strVal($event))" />
               </div>
               <div class="prop-group">
+                <label class="prop-label">Tamaño del título</label>
+                <div class="prop-segment">
+                  <button type="button" class="prop-segment__btn"
+                    [class.prop-segment__btn--active]="($any(block).data.titleLevel ?? 'h1') === 'h1'"
+                    (click)="updateProp('titleLevel', 'h1')">H1</button>
+                  <button type="button" class="prop-segment__btn"
+                    [class.prop-segment__btn--active]="($any(block).data.titleLevel ?? 'h1') === 'h2'"
+                    (click)="updateProp('titleLevel', 'h2')">H2</button>
+                  <button type="button" class="prop-segment__btn"
+                    [class.prop-segment__btn--active]="($any(block).data.titleLevel ?? 'h1') === 'h3'"
+                    (click)="updateProp('titleLevel', 'h3')">H3</button>
+                </div>
+              </div>
+              <div class="prop-group">
                 <label class="prop-label">Subtítulo</label>
                 <textarea class="prop-textarea" rows="2" [value]="$any(block).data.subtitle" (input)="updateProp('subtitle', strVal($event))"></textarea>
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Tamaño del subtítulo</label>
+                <div class="prop-segment">
+                  <button type="button" class="prop-segment__btn"
+                    [class.prop-segment__btn--active]="($any(block).data.subtitleSize ?? 'md') === 'sm'"
+                    (click)="updateProp('subtitleSize', 'sm')">Pequeño</button>
+                  <button type="button" class="prop-segment__btn"
+                    [class.prop-segment__btn--active]="($any(block).data.subtitleSize ?? 'md') === 'md'"
+                    (click)="updateProp('subtitleSize', 'md')">Normal</button>
+                  <button type="button" class="prop-segment__btn"
+                    [class.prop-segment__btn--active]="($any(block).data.subtitleSize ?? 'md') === 'lg'"
+                    (click)="updateProp('subtitleSize', 'lg')">Grande</button>
+                </div>
               </div>
               <div class="prop-group">
                 <label class="prop-label">Texto botón CTA</label>
@@ -431,11 +575,25 @@
                 <label class="prop-label">URL de la imagen</label>
                 <input class="prop-input" type="text"
                   [value]="$any(block).data.src"
-                  (input)="updateProp('src', strVal($event))" />
+                  (input)="onImageSrcChange($event)" />
                 <button class="btn btn--ghost btn--sm" style="margin-top:6px; width:100%"
                   (click)="openImagePicker('src')">
                   🖼️ Seleccionar desde Multimedia
                 </button>
+              </div>
+              <div class="prop-row">
+                <div class="prop-group">
+                  <label class="prop-label">Ancho (px)</label>
+                  <input class="prop-input" type="number" min="1"
+                    [value]="$any(block).data.width ?? ''"
+                    (input)="onImageDimensionChange('width', strVal($event))" />
+                </div>
+                <div class="prop-group">
+                  <label class="prop-label">Alto (px)</label>
+                  <input class="prop-input" type="number" min="1"
+                    [value]="$any(block).data.height ?? ''"
+                    (input)="onImageDimensionChange('height', strVal($event))" />
+                </div>
               </div>
               <div class="prop-group">
                 <label class="prop-label">Texto alternativo</label>
@@ -444,6 +602,20 @@
               <div class="prop-group">
                 <label class="prop-label">Pie de foto</label>
                 <input class="prop-input" type="text" [value]="$any(block).data.caption ?? ''" (input)="updateProp('caption', strVal($event))" />
+              </div>
+              <div class="prop-group">
+                <label class="prop-label">Alineación</label>
+                <div class="prop-segment">
+                  <button type="button" class="prop-segment__btn"
+                    [class.prop-segment__btn--active]="($any(block).data.align ?? 'center') === 'left'"
+                    (click)="updateProp('align', 'left')">Izquierda</button>
+                  <button type="button" class="prop-segment__btn"
+                    [class.prop-segment__btn--active]="($any(block).data.align ?? 'center') === 'center'"
+                    (click)="updateProp('align', 'center')">Centro</button>
+                  <button type="button" class="prop-segment__btn"
+                    [class.prop-segment__btn--active]="($any(block).data.align ?? 'center') === 'right'"
+                    (click)="updateProp('align', 'right')">Derecha</button>
+                </div>
               </div>
               <div class="prop-toggle">
                 <label class="prop-label">Ancho completo</label>
