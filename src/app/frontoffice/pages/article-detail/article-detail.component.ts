@@ -7,6 +7,7 @@ import { ReadingTimePipe } from '../../core/pipes/reading-time.pipe';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { blocksToHtml } from '../../../backoffice/shared/utils/block-html.util';
+import { CanvaService } from '../../../backoffice/shared/services/canva.service';
 
 @Component({
   selector: 'app-article-detail',
@@ -23,6 +24,7 @@ import { blocksToHtml } from '../../../backoffice/shared/utils/block-html.util';
 export class ArticleDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private cms = inject(CmsService);
+  private canvaService = inject(CanvaService);
   private sanitizer = inject(DomSanitizer);
   safeContent = signal<SafeHtml>('');
   showCopyToast = signal(false);
@@ -33,20 +35,22 @@ export class ArticleDetailComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.cms.getArticleById(id).subscribe(article => {
       this.article.set(article);
-      const html = this.resolveArticleHtml(article);
-      if (html) {
-        this.safeContent.set(this.sanitizer.bypassSecurityTrustHtml(html));
-      }
-      this.loading.set(false);
+      void this.resolveArticleHtml(article).then(html => {
+        if (html) {
+          this.safeContent.set(this.sanitizer.bypassSecurityTrustHtml(html));
+        }
+        this.loading.set(false);
+      });
     });
   }
 
-  private resolveArticleHtml(article: Article | undefined): string {
+  private async resolveArticleHtml(article: Article | undefined): Promise<string> {
     if (!article) return '';
 
     if (article.blocksJson) {
       try {
-        const blocks = JSON.parse(article.blocksJson);
+        let blocks = JSON.parse(article.blocksJson);
+        blocks = await this.canvaService.resolveSlidesInBlocks(blocks);
         const generated = blocksToHtml(blocks);
         if (generated) return generated;
       } catch {

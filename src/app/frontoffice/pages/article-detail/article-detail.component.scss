@@ -147,21 +147,31 @@
   }
 
   .article-block--hero {
-    background: linear-gradient(135deg, #1e3a5f 0%, #1e5fa8 100%);
+    /* Fondo y colores vienen del HTML inline generado por el editor */
 
-    h1 {
-      font-size: clamp(1.5rem, 3vw, 2.25rem);
+    :is(h1, h2, h3) {
       font-weight: 800;
       line-height: 1.2;
       margin: 0 0 0.5rem;
-      color: #ffffff;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+    }
+
+    h2 {
+      font-size: clamp(1.5rem, 3vw, 2.25rem);
+    }
+
+    h3 {
+      font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+      font-weight: 700;
     }
 
     p {
       font-size: 1rem;
       line-height: 1.6;
-      margin: 0 0 1.25rem;
-      color: #ffffff;
+      margin: 0 0 0.75rem;
     }
 
     a {
@@ -171,8 +181,6 @@
       text-decoration: none;
       font-weight: 700;
       font-size: 0.9375rem;
-      background: #ffffff;
-      color: #1e5fa8;
     }
   }
 
@@ -181,34 +189,39 @@
     width: 100%;
     max-width: 860px;
     margin: 0 auto;
-    padding: 3rem 2rem;
+    padding: 1rem 2rem;
     box-sizing: border-box;
 
     h2 {
       font-size: 1.875rem;
       font-weight: 700;
       color: #1e293b;
-      margin: 0 0 1rem;
+      margin: 0 0 0.75rem;
     }
 
     p {
       font-size: 1rem;
-      line-height: 1.8;
+      line-height: 1.7;
       color: #334155;
-      margin-bottom: 1rem;
+      margin: 0 0 0.75rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 
   .article-block--image {
     display: block;
-    width: 100%;
-    max-width: 860px;
-    margin: 2rem auto;
+    width: fit-content;
+    max-width: calc(100% - 4rem);
+    margin: 0 auto;
+    margin-block: 0;
     padding: 0 2rem;
     box-sizing: border-box;
 
     img {
-      width: 100%;
+      width: auto;
       max-width: 100%;
       height: auto;
       border-radius: 8px;
@@ -217,13 +230,14 @@
     }
 
     figcaption {
-      margin-top: 0.5rem;
+      margin-top: 0.35rem;
       text-align: center;
       font-size: 0.875rem;
       color: #64748b;
     }
 
     &.article-block--image-full {
+      width: 100%;
       max-width: 100%;
       padding: 0;
     }
@@ -237,13 +251,13 @@
     }
 
     p {
-      margin: 0 0 1.5rem;
+      margin: 0 0 0.75rem;
       color: #64748b;
     }
   }
 
   .article-block--cta {
-    padding: 4rem 2rem;
+    padding: 1.5rem 2rem;
     text-align: center;
     width: 100%;
     box-sizing: border-box;
@@ -258,7 +272,7 @@
     p {
       font-size: 1.0625rem;
       line-height: 1.6;
-      margin: 0 0 2rem;
+      margin: 0 0 1rem;
       color: rgba(255, 255, 255, 0.9);
     }
 
@@ -297,7 +311,7 @@
     display: block;
     width: 70%;
     max-width: 70%;
-    margin: 2rem auto;
+    margin: 0.5rem auto;
     padding: 0 1rem;
     box-sizing: border-box;
     clear: both;

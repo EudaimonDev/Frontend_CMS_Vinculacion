@@ -26,18 +26,20 @@ import { ImageBlock } from '../../core/models/block.model';
       }
 
       .image-block {
-        margin: 2rem auto;
-        max-width: 860px;
+        margin: 0.25rem auto;
+        max-width: calc(100% - 4rem);
         padding: 0 2rem;
         box-sizing: border-box;
+        width: fit-content;
 
         &--full {
+          width: 100%;
           max-width: 100%;
           padding: 0;
         }
 
         &__img {
-          width: 100%;
+          width: auto;
           max-width: 100%;
           height: auto;
           border-radius: 8px;
@@ -46,7 +48,7 @@ import { ImageBlock } from '../../core/models/block.model';
         }
 
         &__caption {
-          margin-top: 0.5rem;
+          margin-top: 0.35rem;
           text-align: center;
           font-size: 0.875rem;
           color: #64748b;

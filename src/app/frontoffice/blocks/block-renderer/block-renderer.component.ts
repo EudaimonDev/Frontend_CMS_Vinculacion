@@ -21,7 +21,7 @@ import { GalleryGridComponent } from '../gallery-grid/gallery-grid.component';
       .video-block {
         width: 70%;
         max-width: 70%;
-        margin: 2rem auto;
+        margin: 0.5rem auto;
         padding: 0 1rem;
         box-sizing: border-box;
       }
@@ -46,7 +46,7 @@ import { GalleryGridComponent } from '../gallery-grid/gallery-grid.component';
       }
 
       .video-block__title {
-        margin: 1rem 0 0;
+        margin: 0.5rem 0 0;
         font-size: 1.125rem;
         font-weight: 600;
         color: #1e293b;

@@ -80,7 +80,7 @@ export function defaultCardsColorData(): Record<string, string> {
 export function heroBackgroundStyle(data: Record<string, unknown>): string {
   if (data['backgroundImage']) return '';
   const solid = cssColor(data['backgroundColor'] as string | undefined);
-  if (solid) return `background-color:${solid};`;
+  if (solid) return `background:${solid};`;
   return `background:${HERO_DEFAULT_GRADIENT};`;
 }
 

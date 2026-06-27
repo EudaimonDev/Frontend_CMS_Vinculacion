@@ -460,6 +460,9 @@
 /* Drop list CDK */
 .drop-list {
   min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 /* ── Bloque wrapper (draggable) ── */
@@ -470,6 +473,8 @@
   outline: 2px solid transparent;
   min-width: 0;
   max-width: 100%;
+  display: flow-root;
+  isolation: isolate;
 
   &:hover { outline: 2px solid #93c5fd; }
 
@@ -569,6 +574,7 @@
   overflow-x: hidden;
   overflow-wrap: anywhere;
   word-break: break-word;
+  display: flow-root;
 
   :is(p, h1, h2, h3, h4, h5, h6, span, div, li, td, strong, a, em, blockquote, pre, label) {
     max-width: 100%;
@@ -585,6 +591,11 @@
     height: auto;
   }
 
+  .bp-image__img {
+    width: auto;
+    max-width: 100%;
+  }
+
   table {
     display: block;
     max-width: 100%;
@@ -597,7 +608,7 @@
 /* ── Builder-only hero preview ── */
 .bp-hero {
   position: relative;
-  min-height: 220px;
+  min-height: 160px;
   background-size: cover;
   background-position: center;
   display: flex;
@@ -619,7 +630,7 @@
   &__content {
     position: relative;
     z-index: 1;
-    padding: 2.5rem 3rem;
+    padding: 1.25rem 2rem;
     color: #fff;
     max-width: 100%;
     min-width: 0;
@@ -653,7 +664,7 @@
   &__subtitle {
     font-size: 1rem;
     opacity: .85;
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.75rem;
     overflow-wrap: anywhere;
     word-break: break-word;
     line-height: 1.6;
@@ -678,7 +689,7 @@
 
 /* ── Builder-only cards preview ── */
 .bp-cards {
-  padding: 2.5rem 2rem;
+  padding: 1rem 2rem;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -694,7 +705,7 @@
 
   &__subtitle {
     color: #64748b;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
     overflow-wrap: anywhere;
     word-break: break-word;
   }
@@ -981,7 +992,7 @@
   align-items: center;
   width: 70%;
   max-width: 70%;
-  margin: 2rem auto;
+  margin: 0.5rem auto;
   padding: 0 1rem;
   box-sizing: border-box;
   text-align: center;
@@ -1011,7 +1022,7 @@
     font-weight: 600;
     font-size: 1.125rem;
     color: #1e293b;
-    margin: 1rem 0 0;
+    margin: 0.5rem 0 0;
     line-height: 1.4;
   }
 
@@ -1027,20 +1038,39 @@
   }
 }
 
+.bp-slides {
+  &__open {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e5fa8;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 /* ── Builder-only image preview ── */
 .bp-image {
-  margin: 2rem auto;
-  max-width: 860px;
+  margin: 0.25rem auto;
   padding: 0 2rem;
   box-sizing: border-box;
   min-width: 0;
+  width: fit-content;
+  max-width: calc(100% - 4rem);
 
   &--full {
+    width: 100%;
     max-width: 100%;
     padding: 0;
   }
 
   &--align-left {
+    margin-left: 2rem;
+    margin-right: auto;
     text-align: left;
 
     .bp-image__img { margin-left: 0; margin-right: auto; }
@@ -1055,6 +1085,8 @@
   }
 
   &--align-right {
+    margin-left: auto;
+    margin-right: 2rem;
     text-align: right;
 
     .bp-image__img { margin-left: auto; margin-right: 0; }
@@ -1062,7 +1094,7 @@
   }
 
   &__img {
-    width: 100%;
+    width: auto;
     max-width: 100%;
     height: auto;
     border-radius: 8px;
@@ -1071,7 +1103,7 @@
   }
 
   &__caption {
-    margin-top: 0.5rem;
+    margin-top: 0.35rem;
     font-size: 0.875rem;
     color: #64748b;
   }

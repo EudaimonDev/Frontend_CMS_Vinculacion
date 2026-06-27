@@ -417,18 +417,24 @@
                     </div>
                   }
                   @case ('slides') {
-                    <div class="bp-video">
-                      @if ($any(block).data.canvaUrl && getCanvaEmbedUrl($any(block).data.canvaUrl); as embedUrl) {
+                    <div class="bp-video bp-slides">
+                      @if ($any(block).data.canvaUrl && getCanvaEmbedUrl($any(block).data); as embedUrl) {
                         <div class="bp-video__player">
                           <iframe
                             [src]="embedUrl"
                             frameborder="0"
                             allow="fullscreen"
                             allowfullscreen
+                            referrerpolicy="strict-origin-when-cross-origin"
                           ></iframe>
                         </div>
                         @if ($any(block).data.title) {
                           <p class="bp-video__title">{{ $any(block).data.title }}</p>
+                        }
+                        @if (getCanvaViewUrl($any(block).data); as viewUrl) {
+                          <a class="bp-slides__open" [href]="viewUrl" target="_blank" rel="noopener noreferrer">
+                            Abrir presentación en Canva
+                          </a>
                         }
                       } @else {
                         <div class="bp-video__icon">
@@ -706,10 +712,16 @@
                   class="prop-input"
                   type="text"
                   [value]="$any(block).data.canvaUrl ?? ''"
-                  (input)="updateProp('canvaUrl', strVal($event))"
-                  placeholder="https://www.canva.com/design/DAFxxxxx/view"
+                  (input)="onCanvaUrlChange($event)"
+                  placeholder="https://canva.link/... o https://www.canva.com/design/..."
                 />
-                <span class="prop-hint">El diseño debe tener acceso "Cualquiera puede ver"</span>
+                @if (canvaResolving()) {
+                  <span class="prop-hint">Resolviendo enlace de Canva…</span>
+                } @else if ($any(block).data.canvaUrl && !getCanvaEmbedUrl($any(block).data)) {
+                  <span class="prop-hint prop-hint--warn">No se pudo interpretar el enlace. Verifica que sea público.</span>
+                } @else {
+                  <span class="prop-hint">Usa «Copiar enlace» con acceso «Ver». Si falla el embed, prueba pegar la URL completa de canva.com/design/…/view</span>
+                }
               </div>
               <div class="prop-group">
                 <label class="prop-label">Título (opcional)</label>

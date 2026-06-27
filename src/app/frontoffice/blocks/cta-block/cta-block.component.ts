@@ -34,7 +34,7 @@ import { CtaBlock } from '../../core/models/block.model';
   styles: [
     `
       .cta-block {
-        padding: 4rem 2rem;
+        padding: 1.5rem 2rem;
         text-align: center;
 
         &--primary {
@@ -66,7 +66,7 @@ import { CtaBlock } from '../../core/models/block.model';
         &__description {
           font-size: 1.0625rem;
           opacity: 0.9;
-          margin-bottom: 2rem;
+          margin-bottom: 1rem;
           line-height: 1.6;
           overflow-wrap: anywhere;
           word-break: break-word;

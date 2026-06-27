@@ -22,6 +22,8 @@ import {
 } from '../../shared/utils/block-color.util';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { CanvaService } from '../../shared/services/canva.service';
+import { buildCanvaEmbedFromBlockData, buildCanvaViewFromBlockData, parseCanvaUrl } from '../../shared/utils/canva-url.util';
 
 
 type Device = 'desktop' | 'tablet' | 'mobile';
@@ -52,7 +54,9 @@ export class PageBuilderComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private service = inject(PagesService);
+  private canvaService = inject(CanvaService);
   showImagePicker = signal(false);
+  canvaResolving = signal(false);
   imagePickerTarget = signal<'backgroundImage' | 'src' | null>(null);
   private http = inject(HttpClient);
   private api = environment.apiUrl;
@@ -184,7 +188,9 @@ export class PageBuilderComponent implements OnInit {
       this.pageTitle.set(page.title);
       this.readingTime.set(page.readingTime ?? 1);
       if (page.blocks.length > 0) {
-        this.blocks.set([...page.blocks].sort((a, b) => a.order - b.order));
+        const sorted = [...page.blocks].sort((a, b) => a.order - b.order);
+        this.blocks.set(sorted);
+        this.resolveSlidesOnLoad(sorted);
         return;
       }
     }
@@ -210,7 +216,9 @@ export class PageBuilderComponent implements OnInit {
           }
         }
 
-        this.blocks.set(blocks.sort((a: any, b: any) => a.order - b.order));
+        const sorted = blocks.sort((a: any, b: any) => a.order - b.order);
+        this.blocks.set(sorted);
+        this.resolveSlidesOnLoad(sorted);
       });
   }
 
@@ -299,12 +307,83 @@ export class PageBuilderComponent implements OnInit {
 
   save(): void {
     this.saving.set(true);
-    setTimeout(() => {
-      this.service.updateBlocks(this.pageId(), this.blocks(), this.readingTime());
-      this.saving.set(false);
-      this.saved.set(true);
-      setTimeout(() => this.saved.set(false), 2000);
-    }, 600);
+    this.service
+      .updateBlocks(this.pageId(), this.blocks(), this.readingTime())
+      .then(() => {
+        this.saved.set(true);
+        setTimeout(() => this.saved.set(false), 2000);
+      })
+      .finally(() => this.saving.set(false));
+  }
+
+  onCanvaUrlChange(event: Event): void {
+    const url = this.strVal(event);
+    const id = this.selectedId();
+    if (!id) return;
+
+    const parsed = parseCanvaUrl(url);
+    this.blocks.update(arr =>
+      arr.map(b => {
+        if (b.id !== id || b.type !== 'slides') return b;
+        return {
+          ...b,
+          data: {
+            ...(b as any).data,
+            canvaUrl: url,
+            canvaDesignId: parsed?.designId,
+            canvaShareToken: parsed?.shareToken,
+          },
+        };
+      }),
+    );
+
+    if (parsed || !url.trim()) return;
+
+    this.canvaResolving.set(true);
+    this.canvaService.resolveUrl(url).then(result => {
+      if (!result) return;
+      this.blocks.update(arr =>
+        arr.map(b => {
+          if (b.id !== id || b.type !== 'slides') return b;
+          return {
+            ...b,
+            data: {
+              ...(b as any).data,
+              canvaUrl: url,
+              canvaDesignId: result.designId,
+              canvaShareToken: result.shareToken,
+            },
+          };
+        }),
+      );
+    }).finally(() => this.canvaResolving.set(false));
+  }
+
+  private resolveSlidesOnLoad(blocks: PageBlock[]): void {
+    blocks
+      .filter(b => b.type === 'slides')
+      .forEach(block => {
+        const data = (block as any).data;
+        if (!data.canvaUrl?.trim()) return;
+        if (data.canvaDesignId && data.canvaShareToken) return;
+        this.canvaService.resolveUrl(data.canvaUrl).then(result => {
+          if (!result) return;
+          this.blocks.update(arr =>
+            arr.map(b =>
+              b.id === block.id
+                ? {
+                    ...b,
+                    data: {
+                      ...(b as any).data,
+                      canvaDesignId: result.designId,
+                      canvaShareToken: result.shareToken,
+                    },
+                  }
+                : b,
+            ),
+          );
+        });
+      });
   }
 
   onReadingTimeChange(value: number | string): void {
@@ -420,11 +499,13 @@ export class PageBuilderComponent implements OnInit {
     }
   }
 
-  getCanvaEmbedUrl(url: string): SafeResourceUrl | null {
-    const match = url?.match(/canva\.com\/design\/([a-zA-Z0-9_-]+)/);
-    if (!match) return null;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(
-      `https://www.canva.com/design/${match[1]}/view?embed`,
-    );
+  getCanvaEmbedUrl(data: { canvaUrl?: string; canvaDesignId?: string; canvaShareToken?: string }): SafeResourceUrl | null {
+    const embed = buildCanvaEmbedFromBlockData(data);
+    if (!embed) return null;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(embed);
+  }
+
+  getCanvaViewUrl(data: { canvaUrl?: string; canvaDesignId?: string; canvaShareToken?: string }): string | null {
+    return buildCanvaViewFromBlockData(data);
   }
 }

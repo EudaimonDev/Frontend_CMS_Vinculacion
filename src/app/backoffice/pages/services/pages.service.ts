@@ -4,10 +4,13 @@ import { Page, PageFormData } from '../models/page.model';
 import { PageBlock } from '../../../frontoffice/core/models/block.model';
 import { environment } from '../../../../environments/environment';
 import { blocksToHtml as generateBlocksHtml } from '../../shared/utils/block-html.util';
+import { CanvaService } from '../../shared/services/canva.service';
+import { buildCanvaEmbedFromBlockData, buildCanvaViewFromBlockData } from '../../shared/utils/canva-url.util';
 
 @Injectable({ providedIn: 'root' })
 export class PagesService {
   private http = inject(HttpClient);
+  private canvaService = inject(CanvaService);
   private api = environment.apiUrl;
   private _categories = signal<any[]>([]);
 
@@ -21,11 +24,8 @@ export class PagesService {
   });
 }
 
-  getCanvaEmbedUrl(url: string): string | null {
-    if (!url) return null;
-    const match = url.match(/canva\.com\/design\/([a-zA-Z0-9_-]+)/);
-    if (!match) return null;
-    return `https://www.canva.com/design/${match[1]}/view?embed`;
+  getCanvaEmbedUrl(data: { canvaUrl?: string; canvaDesignId?: string; canvaShareToken?: string }): string | null {
+    return buildCanvaEmbedFromBlockData(data);
   }
 
   private loadAll(): void {
@@ -93,12 +93,13 @@ export class PagesService {
     });
   }
 
-  updateBlocks(id: string, blocks: PageBlock[], readingTime?: number): void {
+  async updateBlocks(id: string, blocks: PageBlock[], readingTime?: number): Promise<void> {
   const current = this._pages().find(p => p.id === id);
   if (!current) return;
 
-  const contentHtml = this.blocksToHtml(blocks);
-  const blocksJson = JSON.stringify(blocks);
+  const resolvedBlocks = await this.resolveSlidesBlocks(blocks);
+  const contentHtml = this.blocksToHtml(resolvedBlocks);
+  const blocksJson = JSON.stringify(resolvedBlocks);
   const resolvedReadingTime = readingTime ?? current.readingTime ?? 1;
 
   const body = {
@@ -113,16 +114,26 @@ export class PagesService {
     categoryIds: current.categoryId ? [current.categoryId] : [] as number[]
   };
 
-  this.http.put(`${this.api}/Articles/admin/${id}`, body).subscribe(() => {
-    this._pages.update(pages =>
-      pages.map(p =>
-        p.id === id
-          ? { ...p, blocks, readingTime: resolvedReadingTime, updatedAt: new Date() }
-          : p
-      )
-    );
+  await new Promise<void>((resolve, reject) => {
+    this.http.put(`${this.api}/Articles/admin/${id}`, body).subscribe({
+      next: () => {
+        this._pages.update(pages =>
+          pages.map(p =>
+            p.id === id
+              ? { ...p, blocks: resolvedBlocks, readingTime: resolvedReadingTime, updatedAt: new Date() }
+              : p
+          )
+        );
+        resolve();
+      },
+      error: reject,
+    });
   });
 }
+
+  private async resolveSlidesBlocks(blocks: PageBlock[]): Promise<PageBlock[]> {
+    return this.canvaService.resolveSlidesInBlocks(blocks);
+  }
 
   delete(id: string): void {
     this.http.delete(`${this.api}/Articles/admin/${id}`).subscribe(() => {

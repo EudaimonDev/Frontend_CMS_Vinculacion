@@ -115,6 +115,8 @@ export interface SlidesBlock extends BaseBlock {
   data: {
     title?: string;
     canvaUrl: string;
+    canvaDesignId?: string;
+    canvaShareToken?: string;
   };
 }
 
