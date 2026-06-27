@@ -605,6 +605,105 @@
 
 .block-preview--faded { opacity: .45; pointer-events: none; }
 
+.block-preview--text-empty {
+  .bp-text {
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+  }
+}
+
+/* ── Edición inline en lienzo (estilo Canva) ── */
+.bp-canvas-editable {
+  outline: none;
+  cursor: text;
+  border-radius: 4px;
+  transition: box-shadow 0.15s ease;
+
+  &:hover {
+    box-shadow: 0 0 0 2px rgba(30, 95, 168, 0.12);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(30, 95, 168, 0.35);
+
+    &::before {
+      content: none;
+      display: none;
+    }
+  }
+
+  &:not(.bp-canvas-editable--empty)::before,
+  &:not(:empty)::before {
+    content: none;
+    display: none;
+  }
+
+  &--hero.bp-canvas-editable--empty::before,
+  &--hero:empty::before {
+    content: attr(data-placeholder);
+    color: rgba(255, 255, 255, 0.55);
+    pointer-events: none;
+  }
+
+  &--empty:not(.bp-canvas-editable--hero)::before,
+  &:empty:not(.bp-canvas-editable--hero)::before {
+    content: attr(data-placeholder);
+    color: #94a3b8;
+    pointer-events: none;
+  }
+}
+
+/* ── Builder-only text preview ── */
+.bp-text {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  &--center { text-align: center; }
+  &--right { text-align: right; }
+
+  &__title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.75rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  &__body {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #334155;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    min-height: 1.5rem;
+
+    :is(p) {
+      margin: 0 0 0.75rem;
+
+      &:last-child { margin-bottom: 0; }
+    }
+
+    :is(p, span, div, li, td, th, h1, h2, h3, h4, h5, h6, a, strong, em, blockquote, pre) {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    pre, code { white-space: pre-wrap; }
+
+    &--empty {
+      min-height: 2.5rem;
+    }
+  }
+}
+
 /* ── Builder-only hero preview ── */
 .bp-hero {
   position: relative;
@@ -1106,5 +1205,7 @@
     margin-top: 0.35rem;
     font-size: 0.875rem;
     color: #64748b;
+    line-height: 1.4;
+    min-height: 1.25rem;
   }
 }

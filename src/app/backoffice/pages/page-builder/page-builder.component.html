@@ -301,7 +301,9 @@
               </div>
 
               <!-- Bloque renderizado -->
-              <div class="block-preview" [class.block-preview--faded]="!block.visible">
+              <div class="block-preview"
+                [class.block-preview--faded]="!block.visible"
+                [class.block-preview--text-empty]="block.type === 'text' && isTextContentEmpty(block)">
                 @switch (block.type) {
 
                   @case ('hero') {
@@ -313,21 +315,39 @@
                       <div class="bp-hero__content">
                         @switch ($any(block).data.titleLevel ?? 'h1') {
                           @case ('h2') {
-                            <h2 class="bp-hero__title bp-hero__title--h2" [style.color]="$any(block).data.titleColor || null">{{ $any(block).data.title }}</h2>
+                            <h2 class="bp-hero__title bp-hero__title--h2 bp-canvas-editable bp-canvas-editable--hero"
+                              contenteditable="true" spellcheck="true" data-placeholder="Título"
+                              [style.color]="$any(block).data.titleColor || null"
+                              (mousedown)="stopCanvasEdit($event)" (click)="stopCanvasEdit($event)"
+                              (input)="syncEditableEmptyClass($event)"
+                              (blur)="onInlinePlainText(block.id, 'title', $event)">{{ $any(block).data.title }}</h2>
                           }
                           @case ('h3') {
-                            <h3 class="bp-hero__title bp-hero__title--h3" [style.color]="$any(block).data.titleColor || null">{{ $any(block).data.title }}</h3>
+                            <h3 class="bp-hero__title bp-hero__title--h3 bp-canvas-editable bp-canvas-editable--hero"
+                              contenteditable="true" spellcheck="true" data-placeholder="Título"
+                              [style.color]="$any(block).data.titleColor || null"
+                              (mousedown)="stopCanvasEdit($event)" (click)="stopCanvasEdit($event)"
+                              (input)="syncEditableEmptyClass($event)"
+                              (blur)="onInlinePlainText(block.id, 'title', $event)">{{ $any(block).data.title }}</h3>
                           }
                           @default {
-                            <h1 class="bp-hero__title bp-hero__title--h1" [style.color]="$any(block).data.titleColor || null">{{ $any(block).data.title }}</h1>
+                            <h1 class="bp-hero__title bp-hero__title--h1 bp-canvas-editable bp-canvas-editable--hero"
+                              contenteditable="true" spellcheck="true" data-placeholder="Título"
+                              [style.color]="$any(block).data.titleColor || null"
+                              (mousedown)="stopCanvasEdit($event)" (click)="stopCanvasEdit($event)"
+                              (input)="syncEditableEmptyClass($event)"
+                              (blur)="onInlinePlainText(block.id, 'title', $event)">{{ $any(block).data.title }}</h1>
                           }
                         }
-                        @if ($any(block).data.subtitle) {
-                          <p class="bp-hero__subtitle"
-                            [class.bp-hero__subtitle--sm]="$any(block).data.subtitleSize === 'sm'"
-                            [class.bp-hero__subtitle--lg]="$any(block).data.subtitleSize === 'lg'"
-                            [style.color]="$any(block).data.subtitleColor || null">{{ $any(block).data.subtitle }}</p>
-                        }
+                        <p class="bp-hero__subtitle bp-canvas-editable bp-canvas-editable--hero"
+                          [class.bp-hero__subtitle--sm]="$any(block).data.subtitleSize === 'sm'"
+                          [class.bp-hero__subtitle--lg]="$any(block).data.subtitleSize === 'lg'"
+                          [class.bp-canvas-editable--empty]="!$any(block).data.subtitle"
+                          contenteditable="true" spellcheck="true" data-placeholder="Subtítulo"
+                          [style.color]="$any(block).data.subtitleColor || null"
+                          (mousedown)="stopCanvasEdit($event)" (click)="stopCanvasEdit($event)"
+                          (input)="syncEditableEmptyClass($event)"
+                          (blur)="onInlinePlainText(block.id, 'subtitle', $event)">{{ $any(block).data.subtitle }}</p>
                         @if ($any(block).data.ctaLabel) {
                           <span class="bp-hero__cta"
                             [class.bp-hero__cta--custom]="!!$any(block).data.ctaBackgroundColor || !!$any(block).data.ctaTextColor"
@@ -339,7 +359,31 @@
                   }
 
                   @case ('text') {
-                    <app-text-block [block]="$any(block)" />
+                    <section class="bp-text bp-text--{{ $any(block).data.align ?? 'left' }}"
+                      [style.backgroundColor]="$any(block).data.backgroundColor || null"
+                      [style.color]="$any(block).data.textColor || null">
+                      <h2 class="bp-text__title bp-canvas-editable"
+                        [class.bp-canvas-editable--empty]="!$any(block).data.title"
+                        contenteditable="true" spellcheck="true" data-placeholder="Título de sección"
+                        [style.color]="$any(block).data.titleColor || null"
+                        (mousedown)="stopCanvasEdit($event)" (click)="stopCanvasEdit($event)"
+                        (input)="syncEditableEmptyClass($event)"
+                        (blur)="onInlinePlainText(block.id, 'title', $event)">{{ $any(block).data.title }}</h2>
+                      @if (!isTextContentEmpty(block)) {
+                        <div class="bp-text__body bp-canvas-editable"
+                          contenteditable="true" spellcheck="true"
+                          (mousedown)="stopCanvasEdit($event)" (click)="stopCanvasEdit($event)"
+                          (input)="syncEditableEmptyClass($event)"
+                          (blur)="onInlineHtml(block.id, $event)"
+                          [innerHTML]="$any(block).data.html"></div>
+                      } @else if (selectedId() === block.id) {
+                        <div class="bp-text__body bp-text__body--empty bp-canvas-editable bp-canvas-editable--empty"
+                          contenteditable="true" spellcheck="true" data-placeholder="Escribe aquí o usa el panel derecho →"
+                          (mousedown)="stopCanvasEdit($event)" (click)="stopCanvasEdit($event)"
+                          (input)="syncEditableEmptyClass($event)"
+                          (blur)="onInlineHtml(block.id, $event)"></div>
+                      }
+                    </section>
                   }
 
                   @case ('image') {
@@ -358,20 +402,31 @@
                           ? $any(block).data.width + ' / ' + $any(block).data.height
                           : null"
                       />
-                      @if ($any(block).data.caption) {
-                        <figcaption class="bp-image__caption">{{ $any(block).data.caption }}</figcaption>
-                      }
+                      <figcaption class="bp-image__caption bp-canvas-editable"
+                        [class.bp-canvas-editable--empty]="!$any(block).data.caption"
+                        contenteditable="true" spellcheck="true" data-placeholder="Pie de foto"
+                        (mousedown)="stopCanvasEdit($event)" (click)="stopCanvasEdit($event)"
+                        (input)="syncEditableEmptyClass($event)"
+                        (blur)="onInlinePlainText(block.id, 'caption', $event)">{{ $any(block).data.caption }}</figcaption>
                     </figure>
                   }
 
                   @case ('cards-grid') {
                     <div class="bp-cards" [style.backgroundColor]="$any(block).data.backgroundColor || null">
-                      @if ($any(block).data.title) {
-                        <h2 class="bp-cards__title" [style.color]="$any(block).data.titleColor || null">{{ $any(block).data.title }}</h2>
-                      }
-                      @if ($any(block).data.subtitle) {
-                        <p class="bp-cards__subtitle" [style.color]="$any(block).data.subtitleColor || null">{{ $any(block).data.subtitle }}</p>
-                      }
+                      <h2 class="bp-cards__title bp-canvas-editable"
+                        [class.bp-canvas-editable--empty]="!$any(block).data.title"
+                        contenteditable="true" spellcheck="true" data-placeholder="Título de sección"
+                        [style.color]="$any(block).data.titleColor || null"
+                        (mousedown)="stopCanvasEdit($event)" (click)="stopCanvasEdit($event)"
+                        (input)="syncEditableEmptyClass($event)"
+                        (blur)="onInlinePlainText(block.id, 'title', $event)">{{ $any(block).data.title }}</h2>
+                      <p class="bp-cards__subtitle bp-canvas-editable"
+                        [class.bp-canvas-editable--empty]="!$any(block).data.subtitle"
+                        contenteditable="true" spellcheck="true" data-placeholder="Subtítulo"
+                        [style.color]="$any(block).data.subtitleColor || null"
+                        (mousedown)="stopCanvasEdit($event)" (click)="stopCanvasEdit($event)"
+                        (input)="syncEditableEmptyClass($event)"
+                        (blur)="onInlinePlainText(block.id, 'subtitle', $event)">{{ $any(block).data.subtitle }}</p>
                       <div class="bp-cards__grid" [style.grid-template-columns]="'repeat(' + ($any(block).data.columns ?? 2) + ', 1fr)'">
                         @for (card of $any(block).data.cards; track $index) {
                           <div class="bp-card"
@@ -379,8 +434,18 @@
                             [style.background]="$any(block).data.cardBackgroundColor || null"
                             [style.borderColor]="$any(block).data.cardBorderColor || null"
                             [style.color]="$any(block).data.cardTextColor || null">
-                            <strong>{{ card.title }}</strong>
-                            <p>{{ card.description }}</p>
+                            <strong class="bp-canvas-editable"
+                              [class.bp-canvas-editable--empty]="!card.title"
+                              contenteditable="true" spellcheck="true" data-placeholder="Título de tarjeta"
+                              (mousedown)="stopCanvasEdit($event)" (click)="stopCanvasEdit($event)"
+                              (input)="syncEditableEmptyClass($event)"
+                              (blur)="onInlineCardField(block.id, $index, 'title', $event)">{{ card.title }}</strong>
+                            <p class="bp-canvas-editable"
+                              [class.bp-canvas-editable--empty]="!card.description"
+                              contenteditable="true" spellcheck="true" data-placeholder="Descripción"
+                              (mousedown)="stopCanvasEdit($event)" (click)="stopCanvasEdit($event)"
+                              (input)="syncEditableEmptyClass($event)"
+                              (blur)="onInlineCardField(block.id, $index, 'description', $event)">{{ card.description }}</p>
                           </div>
                         }
                       </div>
@@ -641,6 +706,7 @@
               <div class="prop-group">
                 <label class="prop-label">Columnas</label>
                 <select class="prop-select" [value]="$any(block).data.columns ?? 2" (change)="updateProp('columns', numVal($event))">
+                  <option [value]="1">1 columna</option>
                   <option [value]="2">2 columnas</option>
                   <option [value]="3">3 columnas</option>
                   <option [value]="4">4 columnas</option>

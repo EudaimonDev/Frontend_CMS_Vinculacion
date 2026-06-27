@@ -6,7 +6,6 @@ import { QuillModule } from 'ngx-quill';
 import { FormsModule } from '@angular/forms';
 import { PagesService } from '../services/pages.service';
 import { PageBlock, BlockType } from '../../../frontoffice/core/models/block.model';
-import { TextBlockComponent } from '../../../frontoffice/blocks/text-block/text-block.component';
 import { CtaBlockComponent } from '../../../frontoffice/blocks/cta-block/cta-block.component';
 import { ImagePickerComponent } from '../../shared/components/image-picker/image-picker.component';
 import { BlockColorEditorComponent } from '../../shared/components/block-color-editor/block-color-editor.component';
@@ -39,7 +38,6 @@ interface BlockPaletteItem {
   imports: [
     RouterLink,
     DragDropModule,
-    TextBlockComponent,
     CtaBlockComponent,
     QuillModule,
     FormsModule,
@@ -285,9 +283,69 @@ export class PageBuilderComponent implements OnInit {
   updateProp(key: string, value: unknown): void {
     const id = this.selectedId();
     if (!id) return;
+    this.updateBlockDataById(id, key, value);
+  }
+
+  updateBlockDataById(blockId: string, key: string, value: unknown): void {
     this.blocks.update((arr) =>
-      arr.map((b) => (b.id === id ? { ...b, data: { ...(b as any).data, [key]: value } } : b)),
+      arr.map((b) =>
+        b.id === blockId ? { ...b, data: { ...(b as any).data, [key]: value } } : b,
+      ),
     );
+  }
+
+  onInlinePlainText(blockId: string, key: string, event: FocusEvent): void {
+    const el = event.target as HTMLElement;
+    const value = el.innerText.replace(/\u00a0/g, ' ').trim();
+    this.updateBlockDataById(blockId, key, value);
+  }
+
+  onInlineHtml(blockId: string, event: FocusEvent): void {
+    const el = event.target as HTMLElement;
+    const text = el.textContent?.replace(/\u00a0/g, ' ').trim() ?? '';
+    const html = text ? el.innerHTML.trim() : '';
+    this.updateBlockDataById(blockId, 'html', html);
+  }
+
+  onInlineCardField(
+    blockId: string,
+    index: number,
+    field: 'title' | 'description',
+    event: FocusEvent,
+  ): void {
+    const value = (event.target as HTMLElement).innerText.replace(/\u00a0/g, ' ').trim();
+    this.blocks.update((arr) =>
+      arr.map((b) => {
+        if (b.id !== blockId || b.type !== 'cards-grid') return b;
+        const cards = [...((b as any).data.cards ?? [])];
+        if (!cards[index]) return b;
+        cards[index] = { ...cards[index], [field]: value };
+        return { ...b, data: { ...(b as any).data, cards } };
+      }),
+    );
+  }
+
+  isTextContentEmpty(block: PageBlock): boolean {
+    if (block.type !== 'text') return false;
+    const html = String((block as any).data.html ?? '').trim();
+    if (!html) return true;
+    const text = html
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return !text;
+  }
+
+  stopCanvasEdit(event: Event): void {
+    event.stopPropagation();
+  }
+
+  /** Oculta el placeholder al escribir sin esperar al blur (evita solapamiento). */
+  syncEditableEmptyClass(event: Event): void {
+    const el = event.target as HTMLElement;
+    const text = el.textContent?.replace(/\u00a0/g, ' ').trim() ?? '';
+    el.classList.toggle('bp-canvas-editable--empty', !text);
   }
 
   updateColorProp(key: string, value: string): void {
