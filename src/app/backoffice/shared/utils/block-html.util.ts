@@ -88,14 +88,14 @@ export function blocksToHtml(blocks: unknown[]): string {
           const wrapStyles = fullWidth
             ? `margin:0;width:100%;padding:0;box-sizing:border-box;${align.figure}`
             : `margin:0 auto;width:fit-content;max-width:860px;padding:0 2rem;box-sizing:border-box;${align.figure}`;
-          let imgStyles = `max-width:100%;border-radius:8px;display:block;object-fit:contain;${align.img}`;
+          let imgStyles = `max-width:100%;height:auto;border-radius:8px;display:block;vertical-align:top;${align.img}`;
           if (fullWidth) {
-            imgStyles += 'width:100%;height:auto;';
+            imgStyles += 'width:100%;';
             if (w && h) imgStyles += `aspect-ratio:${w}/${h};`;
-          } else if (w && h) {
-            imgStyles += `width:${w}px;height:${h}px;`;
+          } else if (w) {
+            imgStyles += `width:min(${w}px,100%);`;
           } else {
-            imgStyles += 'width:100%;height:auto;';
+            imgStyles += 'width:auto;';
           }
           const captionHtml = data['caption']
             ? `<figcaption style="margin-top:0.5rem;${align.caption}font-size:0.875rem;color:#64748b">${data['caption']}</figcaption>`
@@ -168,17 +168,17 @@ export function blocksToHtml(blocks: unknown[]): string {
           const canvaView = buildCanvaViewFromBlockData(slideData);
           if (!canvaEmbed) return '';
           const titleHtml = data['title']
-            ? `<p style="margin:0.5rem 0 0;text-align:center;font-size:1rem;font-weight:600;color:#1e293b">${data['title']}</p>`
+            ? `<p class="slides-block__title" style="margin:0.5rem 0 0;text-align:center;font-size:1rem;font-weight:600;color:#1e293b">${data['title']}</p>`
             : '';
           const fallbackHtml = canvaView
-            ? `<p style="margin:0.5rem 0 0;text-align:center;font-size:0.875rem"><a href="${canvaView}" target="_blank" rel="noopener noreferrer" style="color:#1e5fa8;font-weight:600">Abrir presentación en Canva</a></p>`
+            ? `<p class="slides-block__link" style="margin:0.5rem 0 0;text-align:center;font-size:0.875rem"><a href="${canvaView}" target="_blank" rel="noopener noreferrer" style="color:#1e5fa8;font-weight:600">Abrir presentación en Canva</a></p>`
             : '';
-          return `<div class="canva-embed article-block article-block--slides" style="position:relative;width:100%;height:0;padding-top:56.2225%;
-                box-shadow:0 2px 8px 0 rgba(63,69,81,0.16);margin:0.5rem 0;overflow:hidden;
-                border-radius:8px;">
+          return `<div class="article-block article-block--slides" style="width:85%;max-width:780px;margin:0.75rem auto;padding:0 1.5rem;box-sizing:border-box">
+              <div class="canva-embed" style="position:relative;width:100%;height:0;padding-top:56.2225%;
+                box-shadow:0 2px 8px 0 rgba(63,69,81,0.16);overflow:hidden;border-radius:8px;">
               <iframe loading="lazy" style="position:absolute;width:100%;height:100%;top:0;left:0;border:none;padding:0;margin:0;"
                 src="${canvaEmbed}" ${CANVA_IFRAME_ATTRS}></iframe>
-            </div>${titleHtml}${fallbackHtml}`;
+            </div>${titleHtml}${fallbackHtml}</div>`;
         }
         case 'cta': {
           const variant = ctaVariantColors(data['variant'] as string | undefined);
