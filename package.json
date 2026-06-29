@@ -43,6 +43,7 @@
     "@angular/compiler-cli": "^20.2.0",
     "@types/jasmine": "~5.1.0",
     "@types/quill": "^2.0.14",
+    "angular-cli-ghpages": "^3.1.0",
     "angular-eslint": "^21.0.1",
     "autoprefixer": "^10.5.0",
     "eslint": "^9.39.1",
