@@ -1,5 +1,6 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { PageFormData } from '../models/page.model';
@@ -35,7 +36,7 @@ interface BlockOption {
   templateUrl: './page-editor.component.html',
   styleUrl: './page-editor.component.scss',
 })
-export class PageEditorComponent implements OnInit {
+export class PageEditorComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -43,6 +44,16 @@ export class PageEditorComponent implements OnInit {
   private http = inject(HttpClient);
   private api = environment.apiUrl;
   categories = signal<any[]>([]);
+  readonly selectedCategoryId = signal<number | null>(null);
+  private categorySubscription?: Subscription;
+
+  readonly availableSubCategories = computed(() => {
+    const categoryId = this.selectedCategoryId();
+    if (!categoryId) return [];
+
+    const category = this.categories().find(cat => cat.categoryId === categoryId);
+    return (category?.subCategories ?? []).filter((sub: { isActive?: boolean }) => sub.isActive !== false);
+  });
 
   mode = signal<EditorMode>('new');
   pageId = signal<string | null>(null);
@@ -57,6 +68,7 @@ export class PageEditorComponent implements OnInit {
     status: ['draft' as 'published' | 'draft' | 'archived'],
     description: [''],
     categoryId: [null as number | null],
+    subCategoryId: [null as number | null],
     featured: [false]
   });
 
@@ -107,42 +119,70 @@ export class PageEditorComponent implements OnInit {
   ngOnInit(): void {
   const id = this.route.snapshot.paramMap.get('id');
 
-  this.http.get<any[]>(`${environment.apiUrl}/Categories`)
+  this.http.get<any[]>(`${environment.apiUrl}/Categories/admin`)
     .subscribe(cats => this.categories.set(cats));
+
+  this.categorySubscription = this.form.get('categoryId')?.valueChanges.subscribe(value => {
+    const categoryId = value != null ? Number(value) : null;
+    this.selectedCategoryId.set(categoryId);
+    this.syncSubCategoryControl(categoryId);
+  });
 
   if (id) {
     this.mode.set('edit');
     this.pageId.set(id);
 
-    // Cargar directo del backend para tener categoryId
     this.http.get<any>(`${environment.apiUrl}/Articles/admin/${id}`)
       .subscribe(article => {
-        // Buscar el categoryId comparando el slug de category con las categorías
-        this.categories().forEach(() => {}); // esperar categorías...
-
-        // Cargar categorías y artículo juntos
-        this.http.get<any[]>(`${environment.apiUrl}/Categories`).subscribe(cats => {
+        this.http.get<any[]>(`${environment.apiUrl}/Categories/admin`).subscribe(cats => {
           this.categories.set(cats);
-          const matchedCat = cats.find(c => c.slug === article.category);
+          const categoryId = article.categoryIds?.[0]
+            ?? cats.find(c => c.slug === article.category)?.categoryId
+            ?? null;
+
+          this.selectedCategoryId.set(categoryId);
 
           this.form.patchValue({
             title: article.title,
             status: article.statusName === 'Published' ? 'published' : 'draft',
             description: article.excerpt ?? '',
-            categoryId: matchedCat?.categoryId ?? null,
+            categoryId,
+            subCategoryId: article.subCategoryId ?? null,
             featured: article.featured ?? false
           });
+          this.syncSubCategoryControl(categoryId);
         });
 
-        // Cargar bloques
         if (article.blocksJson) {
           try {
             this.blocks.set(JSON.parse(article.blocksJson));
           } catch { this.blocks.set([]); }
         }
       });
+  } else {
+    this.syncSubCategoryControl(null);
   }
 }
+
+  ngOnDestroy(): void {
+    this.categorySubscription?.unsubscribe();
+  }
+
+  onCategoryChange(): void {
+    this.form.patchValue({ subCategoryId: null });
+    this.syncSubCategoryControl(this.selectedCategoryId());
+  }
+
+  private syncSubCategoryControl(categoryId: number | null): void {
+    const control = this.form.get('subCategoryId');
+    if (!control) return;
+
+    if (categoryId) {
+      control.enable({ emitEvent: false });
+    } else {
+      control.disable({ emitEvent: false });
+    }
+  }
 
   // ── Bloques ──────────────────────────────────────────────────
 
@@ -199,7 +239,9 @@ export class PageEditorComponent implements OnInit {
   }
   this.saving.set(true);
 
-  const formData = this.form.value as PageFormData;
+  const formData = this.form.getRawValue() as PageFormData;
+  const categoryIds = formData.categoryId ? [Number(formData.categoryId)] : [] as number[];
+  const subCategoryId = formData.subCategoryId ? Number(formData.subCategoryId) : null;
 
   // Convertir TODOS los bloques a contentHtml
   const contentHtml = this.service.blocksToHtml(this.blocks()) || '<p></p>';
@@ -213,7 +255,8 @@ export class PageEditorComponent implements OnInit {
       emoji: '📄',
       readingTime: 1,
       featured: formData.featured ?? false,
-      categoryIds: formData.categoryId ? [Number(formData.categoryId)] : [] as number[]
+      categoryIds,
+      subCategoryId
     };
 
     this.http.post<any>(`${this.api}/Articles/admin`, body).subscribe({
@@ -238,7 +281,8 @@ export class PageEditorComponent implements OnInit {
     emoji: '📄',
     readingTime: 1,
     featured: formData.featured ?? false,
-    categoryIds: formData.categoryId ? [Number(formData.categoryId)] : [] as number[]
+    categoryIds,
+    subCategoryId
   };
   this.http.put(`${this.api}/Articles/admin/${this.pageId()}`, body).subscribe({
     next: () => {

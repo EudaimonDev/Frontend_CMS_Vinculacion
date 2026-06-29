@@ -21,6 +21,9 @@ import {
 const TEXT_CONTAIN =
   'max-width:100%;overflow-wrap:anywhere;word-break:break-word;overflow-x:hidden;box-sizing:border-box';
 
+const ARTICLE_CONTENT_WRAP =
+  'display:block;width:100%;max-width:860px;margin:0 auto;padding:1rem 2rem;box-sizing:border-box';
+
 /** Convierte bloques del editor a HTML con los colores por defecto del editor visual. */
 export function blocksToHtml(blocks: unknown[]): string {
   const heroDefaults = defaultHeroColorData();
@@ -37,12 +40,7 @@ export function blocksToHtml(blocks: unknown[]): string {
           const align = (data['align'] as string) ?? 'left';
           const wrapStyles = [
             TEXT_CONTAIN,
-            'display:block',
-            'width:100%',
-            'max-width:860px',
-            'margin:0 auto',
-            'padding:1rem 2rem',
-            'box-sizing:border-box',
+            ARTICLE_CONTENT_WRAP,
             `text-align:${align}`,
             `background-color:${cssColor(data['backgroundColor'] as string, textDefaults['backgroundColor'])}`,
             `color:${cssColor(data['textColor'] as string, textDefaults['textColor'])}`,
@@ -144,10 +142,11 @@ export function blocksToHtml(blocks: unknown[]): string {
             `color:${cssColor(data['cardTextColor'] as string, cardsDefaults['cardTextColor'])};`,
             TEXT_CONTAIN,
           ].join(';');
-          return `<div class="article-block article-block--cards" style="${sectionStyle}${TEXT_CONTAIN};padding:1rem 2rem;width:100%">
+          const columns = Number(data['columns'] ?? 2);
+          return `<div class="article-block article-block--cards" style="${sectionStyle}${TEXT_CONTAIN};${ARTICLE_CONTENT_WRAP}">
               ${data['title'] ? `<h2 style="${titleStyle}font-size:1.5rem;font-weight:700;margin:0 0 0.375rem">${data['title']}</h2>` : ''}
               ${data['subtitle'] ? `<p style="${subtitleStyle}margin:0 0 0.75rem">${data['subtitle']}</p>` : ''}
-              <div style="display:grid;grid-template-columns:repeat(${data['columns'] ?? 2},1fr);gap:1rem;margin:0.5rem 0">
+              <div class="article-block__cards-grid" style="display:grid;grid-template-columns:repeat(${columns},minmax(0,1fr));gap:1rem;margin:0.5rem 0;max-width:100%;min-width:0">
                 ${((data['cards'] as Array<{ title: string; description: string }>) ?? []).map(
                   (c) => `
                   <div style="${cardStyle}">

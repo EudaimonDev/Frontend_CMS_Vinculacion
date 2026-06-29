@@ -1,5 +1,6 @@
 import { Injectable, computed, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
 import {
   Catalog,
   CatalogEstado,
@@ -90,10 +91,12 @@ export class CatalogsService {
     return null;
   }
 
-  delete(id: string): void {
-    this.http.delete(`${this.api}/Categories/admin/${id}`).subscribe(() => {
-      this._catalogs.update(cs => cs.filter(c => c.id !== id));
-    });
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.api}/Categories/admin/${id}`).pipe(
+      tap(() => {
+        this._catalogs.update(cs => cs.filter(c => c.id !== id));
+      }),
+    );
   }
 
   slugify(value: string): string {

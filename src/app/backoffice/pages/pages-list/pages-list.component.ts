@@ -27,7 +27,10 @@ export class PagesListComponent {
     const q = this.searchQuery().toLowerCase().trim();
     if (!q) return this.pages();
     return this.pages().filter(
-      (p) => p.title.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q),
+      (p) =>
+        p.title.toLowerCase().includes(q) ||
+        (p.categoryName?.toLowerCase().includes(q) ?? false) ||
+        (p.subCategoryName?.toLowerCase().includes(q) ?? false),
     );
   });
 

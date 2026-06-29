@@ -1,6 +1,8 @@
 import { DatePipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { SnackbarNotificationService } from '../../../core/shared/snackbar-notification/snackbar-notification.service';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge';
@@ -25,6 +27,7 @@ interface FilterOption {
 export class CatalogsListComponent {
   private readonly router = inject(Router);
   private readonly catalogsService = inject(CatalogsService);
+  private readonly snackBarNotification = inject(SnackbarNotificationService);
 
   readonly catalogs = this.catalogsService.catalogs;
   readonly metrics = this.catalogsService.metrics;
@@ -104,11 +107,42 @@ export class CatalogsListComponent {
 
     this.deleteLoading.set(true);
 
-    setTimeout(() => {
-      this.catalogsService.delete(catalog.id);
-      this.catalogToDelete.set(null);
-      this.deleteLoading.set(false);
-    }, 500);
+    this.catalogsService.delete(catalog.id).subscribe({
+      next: () => {
+        this.catalogToDelete.set(null);
+        this.deleteLoading.set(false);
+        this.snackBarNotification.openCustomNotification(
+          'Catálogo eliminado',
+          `«${catalog.name}» ha sido eliminado correctamente.`,
+          'success',
+        );
+      },
+      error: (err: HttpErrorResponse) => {
+        this.deleteLoading.set(false);
+        this.snackBarNotification.openCustomNotification(
+          'No se puede eliminar',
+          this.resolveDeleteErrorMessage(err),
+          'error',
+          { duration: 7000 },
+        );
+      },
+    });
+  }
+
+  private resolveDeleteErrorMessage(err: HttpErrorResponse): string {
+    if (typeof err.error?.message === 'string' && err.error.message.trim()) {
+      return err.error.message;
+    }
+
+    if (err.status === 403) {
+      return 'No tienes permisos para eliminar catálogos.';
+    }
+
+    if (err.status === 404) {
+      return 'El catálogo ya no existe o fue eliminado previamente.';
+    }
+
+    return 'No se pudo eliminar el catálogo. Inténtalo de nuevo.';
   }
 
   visibilityLabel(visibility: CatalogVisibility): string {

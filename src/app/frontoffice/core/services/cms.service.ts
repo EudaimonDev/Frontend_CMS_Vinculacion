@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { Article, ArticleCategory } from '../models/article.model';
+import { Article, ArticleCategory, CategoryNav } from '../models/article.model';
 import { Block } from '../models/block.model';
 import { environment } from '../../../../environments/environment';
 
@@ -45,6 +45,74 @@ export class CmsService {
   getArticleById(id: string): Observable<Article | undefined> {
     return this.http
       .get<Article>(`${this.api}/Articles/${id}`);
+  }
+
+  getCategoryBySlug(slug: string): Observable<CategoryNav | undefined> {
+    return this.fetchPublicCategories().pipe(
+      map(categories => this.mapCategoryNav(categories.find(c => c.slug === slug))),
+    );
+  }
+
+  getCategoryNav(categoryId: number): Observable<CategoryNav | undefined> {
+    return this.fetchPublicCategories().pipe(
+      map(categories => this.mapCategoryNav(categories.find(c => c.categoryId === categoryId))),
+    );
+  }
+
+  private fetchPublicCategories() {
+    return this.http.get<Array<{
+      categoryId: number;
+      name: string;
+      slug: string;
+      imageUrl?: string;
+      subCategories?: Array<{
+        subCategoryId: number;
+        name: string;
+        slug: string;
+        isActive: boolean;
+      }>;
+    }>>(`${this.api}/Categories`);
+  }
+
+  private mapCategoryNav(
+    category?: {
+      categoryId: number;
+      name: string;
+      slug: string;
+      imageUrl?: string;
+      subCategories?: Array<{
+        subCategoryId: number;
+        name: string;
+        slug: string;
+        isActive: boolean;
+      }>;
+    },
+  ): CategoryNav | undefined {
+    if (!category) return undefined;
+
+    return {
+      categoryId: category.categoryId,
+      name: category.name,
+      slug: category.slug,
+      imageUrl: category.imageUrl,
+      articles: [],
+      subCategories: (category.subCategories ?? [])
+        .filter(sub => sub.isActive)
+        .map(sub => ({
+          subCategoryId: sub.subCategoryId,
+          name: sub.name,
+          slug: sub.slug,
+          articles: [],
+        })),
+    };
+  }
+
+  getArticlesByCategoryId(categoryId: number): Observable<Article[]> {
+    return this.http
+      .get<{ items: Article[]; total: number }>(`${this.api}/Articles`, {
+        params: { page: 1, pageSize: 100, categoryId },
+      })
+      .pipe(map(res => res.items));
   }
 
   getHomePage(): Observable<HomePage> {

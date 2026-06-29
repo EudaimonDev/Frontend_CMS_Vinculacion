@@ -9,6 +9,9 @@ export interface Page {
   status: PageStatus;
   description?: string;
   categoryId?: number | null | undefined;
+  categoryName?: string | null;
+  subCategoryId?: number | null | undefined;
+  subCategoryName?: string | null;
   featured?: boolean;
   readingTime?: number;
   blocks: PageBlock[];
@@ -22,5 +25,6 @@ export interface PageFormData {
   status: PageStatus;
   description?: string;
   categoryId?: number | null | undefined;
-    featured?: boolean;  // ← agregar esto
+  subCategoryId?: number | null | undefined;
+  featured?: boolean;
 }

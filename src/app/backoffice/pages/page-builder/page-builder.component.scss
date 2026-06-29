@@ -788,8 +788,10 @@
 
 /* ── Builder-only cards preview ── */
 .bp-cards {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
   padding: 1rem 2rem;
-  max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
 
@@ -812,6 +814,8 @@
   &__grid {
     display: grid;
     gap: 1rem;
+    max-width: 100%;
+    min-width: 0;
   }
 }
 
@@ -942,6 +946,44 @@
   display: flex;
   flex-direction: column;
   gap: .3rem;
+
+  &--editor {
+    gap: .45rem;
+    margin-bottom: .25rem;
+  }
+}
+
+.prop-quill {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+
+  ::ng-deep quill-editor {
+    display: block;
+    width: 100%;
+  }
+
+  ::ng-deep .ql-toolbar.ql-snow {
+    border: 1.5px solid #e2e8f0;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    background: #f8fafc;
+    padding: .4rem;
+  }
+
+  ::ng-deep .ql-container.ql-snow {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 0 0 6px 6px;
+    background: #fff;
+    font-size: .875rem;
+    min-height: 200px;
+  }
+
+  ::ng-deep .ql-editor {
+    min-height: 200px;
+    padding: .65rem .75rem;
+  }
 }
 
 .prop-toggle {

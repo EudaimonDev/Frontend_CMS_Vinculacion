@@ -38,6 +38,7 @@ export class CatalogEditorComponent implements OnInit {
   readonly showImagePicker = signal(false);
   readonly articles = signal<any[]>([]);
   readonly articleCount = signal<number>(0);
+  private readonly expandedSubCats = signal<Set<number>>(new Set());
 
   readonly estadoOptions: { value: CatalogEstado; label: string }[] = [
     { value: 'borrador', label: CATALOG_ESTADO_LABELS.borrador },
@@ -97,6 +98,7 @@ export class CatalogEditorComponent implements OnInit {
         });
 
         this.subCategoriesForm.clear();
+        this.expandedSubCats.set(new Set());
         (cat.subCategories ?? []).forEach((sub: any) => {
           this.subCategoriesForm.push(this.createSubCategoryGroup(this.catalogsService.mapSubCategory(sub)));
         });
@@ -123,11 +125,39 @@ export class CatalogEditorComponent implements OnInit {
   }
 
   addSubCategory(): void {
+    const index = this.subCategoriesForm.length;
     this.subCategoriesForm.push(this.createSubCategoryGroup());
+    this.expandedSubCats.update(set => new Set(set).add(index));
   }
 
   removeSubCategory(index: number): void {
     this.subCategoriesForm.removeAt(index);
+    this.expandedSubCats.update(set => {
+      const next = new Set<number>();
+      for (const i of set) {
+        if (i < index) next.add(i);
+        else if (i > index) next.add(i - 1);
+      }
+      return next;
+    });
+  }
+
+  isSubCategoryExpanded(index: number): boolean {
+    return this.expandedSubCats().has(index);
+  }
+
+  toggleSubCategory(index: number): void {
+    this.expandedSubCats.update(set => {
+      const next = new Set(set);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  }
+
+  subCategoryTitle(index: number): string {
+    const name = this.subCategoriesForm.at(index)?.get('name')?.value?.trim();
+    return `${index + 1}. ${name || 'Sin nombre'}`;
   }
 
   openImagePicker(): void {

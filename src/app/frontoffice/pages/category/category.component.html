@@ -1,21 +1,50 @@
 <div class="category-page">
   <div class="category-header">
-    <h1>{{ categoryName() | titlecase }}</h1>
-    <p>{{ articles().length }} artículo(s) encontrado(s)</p>
+    <h1>{{ category()?.name || (routeSlug() | titlecase) }}</h1>
+    <p>{{ totalArticles() }} artículo(s) encontrado(s)</p>
   </div>
 
-  <div class="loading" *ngIf="loading()">
-    <div class="spinner"></div>
-  </div>
-
-  <div class="cards-grid" *ngIf="!loading()">
-    <app-article-card
-      *ngFor="let article of articles()"
-      [article]="article"
-    />
-
-    <div class="empty" *ngIf="articles().length === 0">
+  @if (loading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+    </div>
+  } @else if (totalArticles() === 0) {
+    <div class="empty">
       No hay artículos en esta categoría aún.
     </div>
-  </div>
+  } @else {
+    @if (mainArticles().length > 0) {
+      <section class="category-section">
+        <div class="section-card section-card--main">
+          <div class="section-card__header">
+            <h2>{{ category()?.name }}</h2>
+            <p>{{ mainArticles().length }} artículo(s)</p>
+          </div>
+
+          <div class="cards-grid">
+            @for (article of mainArticles(); track article.id) {
+              <app-article-card [article]="article" />
+            }
+          </div>
+        </div>
+      </section>
+    }
+
+    @for (section of subCategorySections(); track section.subCategoryId) {
+      <section class="category-section">
+        <div class="section-card">
+          <div class="section-card__header">
+            <h2>{{ section.name }}</h2>
+            <p>{{ section.articles.length }} artículo(s)</p>
+          </div>
+
+          <div class="cards-grid">
+            @for (article of section.articles; track article.id) {
+              <app-article-card [article]="article" />
+            }
+          </div>
+        </div>
+      </section>
+    }
+  }
 </div>

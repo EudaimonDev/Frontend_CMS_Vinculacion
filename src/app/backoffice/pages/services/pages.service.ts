@@ -78,8 +78,9 @@ export class PagesService {
       excerpt: data.description ?? current.description ?? '',
       emoji: '📄',
       readingTime: current.readingTime ?? 1,
-      featured: current.featured ?? false,          // ← usar valor actual
-      categoryIds: current.categoryId ? [current.categoryId] : [] as number[]
+      featured: current.featured ?? false,
+      categoryIds: current.categoryId ? [current.categoryId] : [] as number[],
+      subCategoryId: data.subCategoryId ?? current.subCategoryId ?? null
     };
 
     this.http.put(`${this.api}/Articles/admin/${id}`, body).subscribe(() => {
@@ -111,7 +112,8 @@ export class PagesService {
     emoji: '📄',
     readingTime: resolvedReadingTime,
     featured: current.featured ?? false,
-    categoryIds: current.categoryId ? [current.categoryId] : [] as number[]
+    categoryIds: current.categoryId ? [current.categoryId] : [] as number[],
+    subCategoryId: current.subCategoryId ?? null
   };
 
   await new Promise<void>((resolve, reject) => {
@@ -180,6 +182,9 @@ export class PagesService {
   }
   // Resolver categoryId buscando por slug
   const matchedCat = this._categories().find(c => c.slug === article.category);
+  const categoryName = article.categories?.[0] ?? matchedCat?.name ?? null;
+  const subCategoryName = article.subCategoryName ?? null;
+
   return {
     id: article.id,
     title: article.title,
@@ -187,8 +192,11 @@ export class PagesService {
     status: article.statusName === 'Published' ? 'published' :
             article.statusName === 'Draft' ? 'draft' : 'archived',
     description: article.excerpt ?? '',
-     categoryId: matchedCat?.categoryId ?? null,
-    featured: article.featured ?? false,  // ← agregar
+    categoryId: article.categoryIds?.[0] ?? matchedCat?.categoryId ?? null,
+    categoryName,
+    subCategoryId: article.subCategoryId ?? null,
+    subCategoryName,
+    featured: article.featured ?? false,
     readingTime: article.readingTime ?? 1,
     blocks,
     createdAt: parseDate(article.createdAt),

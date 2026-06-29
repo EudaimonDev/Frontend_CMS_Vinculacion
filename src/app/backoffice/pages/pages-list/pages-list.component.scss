@@ -133,6 +133,36 @@
   white-space: nowrap;
 }
 
+.taxonomy-pill {
+  display: inline-flex;
+  align-items: center;
+  max-width: 180px;
+  padding: .2rem .55rem;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &--category {
+    background: #ecfeff;
+    color: #0f766e;
+    border: 1px solid #99f6e4;
+  }
+
+  &--subcategory {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+  }
+}
+
+.taxonomy-empty {
+  color: var(--color-text-light);
+  font-size: .875rem;
+}
+
 .blocks-count {
   display: inline-flex;
   align-items: center;

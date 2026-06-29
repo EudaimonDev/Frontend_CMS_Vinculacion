@@ -616,15 +616,16 @@
                 <label class="prop-label">Título</label>
                 <input class="prop-input" type="text" [value]="$any(block).data.title ?? ''" (input)="updateProp('title', strVal($event))" />
               </div>
-              <div class="prop-group">
+              <div class="prop-group prop-group--editor">
                 <label class="prop-label">Contenido</label>
-                <quill-editor
-                  [ngModel]="$any(block).data.html"
-                  (ngModelChange)="onQuillChange($event)"
-                  [modules]="quillModules"
-                  [styles]="{ 'min-height': '200px' }"
-                  theme="snow"
-                ></quill-editor>
+                <div class="prop-quill">
+                  <quill-editor
+                    [ngModel]="$any(block).data.html"
+                    (ngModelChange)="onQuillChange($event)"
+                    [modules]="quillModules"
+                    theme="snow"
+                  ></quill-editor>
+                </div>
               </div>
               <div class="prop-group">
                 <label class="prop-label">Alineación</label>

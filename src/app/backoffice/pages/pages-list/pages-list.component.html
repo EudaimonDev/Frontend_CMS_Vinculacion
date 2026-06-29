@@ -19,7 +19,7 @@
     </svg>
     <input
       type="text"
-      placeholder="Buscar por título o slug..."
+      placeholder="Buscar por título o categoría..."
       [value]="searchQuery()"
       (input)="searchQuery.set($any($event.target).value)"
       class="search-input"
@@ -43,8 +43,9 @@
       <thead>
         <tr>
           <th>Título</th>
-          <th>Slug</th>
-          <th>Bloques</th>
+          <th>Categoría</th>
+          <th>Subcategoría</th>
+
           <th>Estado</th>
           <th>Actualizado</th>
           <th class="table__th--actions">Acciones</th>
@@ -60,11 +61,20 @@
               }
             </td>
             <td>
-              <code class="slug-chip">{{ page.slug }}</code>
+              @if (page.categoryName) {
+                <span class="taxonomy-pill taxonomy-pill--category">{{ page.categoryName }}</span>
+              } @else {
+                <span class="taxonomy-empty">—</span>
+              }
             </td>
             <td>
-              <span class="blocks-count">{{ page.blocks.length }}</span>
+              @if (page.subCategoryName) {
+                <span class="taxonomy-pill taxonomy-pill--subcategory">{{ page.subCategoryName }}</span>
+              } @else {
+                <span class="taxonomy-empty">—</span>
+              }
             </td>
+
             <td>
               <app-status-badge [status]="page.status" />
             </td>

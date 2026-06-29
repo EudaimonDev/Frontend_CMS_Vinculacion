@@ -179,7 +179,7 @@
 @if (catalogToDelete()) {
   <app-modal
     title="Eliminar catálogo"
-    [description]="'¿Seguro que deseas eliminar «' + catalogToDelete()!.name + '»? También se eliminarán sus ítems asociados.'"
+    [description]="'¿Seguro que deseas eliminar «' + catalogToDelete()!.name + '»? Si tiene artículos asociados, no podrá eliminarse.'"
     confirmLabel="Sí, eliminar"
     cancelLabel="Cancelar"
     variant="danger"
