@@ -1,0 +1,1 @@
+import"./chunk-GAL4ENT6.js";var t=[{path:"",loadComponent:()=>import("./chunk-ZFPS74GS.js").then(o=>o.CatalogsListComponent)},{path:"new",loadComponent:()=>import("./chunk-ORFDPUZG.js").then(o=>o.CatalogEditorComponent)},{path:":id/edit",loadComponent:()=>import("./chunk-ORFDPUZG.js").then(o=>o.CatalogEditorComponent)}];export{t as catalogsRoutes};
