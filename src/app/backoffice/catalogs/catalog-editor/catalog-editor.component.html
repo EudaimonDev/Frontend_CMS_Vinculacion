@@ -40,12 +40,6 @@
           }
         </div>
 
-        <div class="form-group" [class.form-group--error]="fieldError('slug', 'required')">
-          <label class="form-label">Slug <span class="required">*</span></label>
-          <input type="text" formControlName="slug" class="form-input form-input--mono" placeholder="servicios-obstetricos" />
-          <span class="form-hint">Se usa como identificador amigable del catálogo.</span>
-        </div>
-
         <div class="form-group" [class.form-group--error]="fieldError('description', 'required')">
           <label class="form-label">Descripción <span class="required">*</span></label>
           <textarea formControlName="description" rows="4" class="form-textarea"
@@ -60,20 +54,28 @@
 
         <div class="form-group">
           <label class="form-label">Imagen de portada</label>
-          <input type="text" formControlName="imageUrl" class="form-input" placeholder="https://ejemplo.com/imagen.jpg" />
-          <span class="form-hint">Pega una URL de imagen externa.</span>
-          @if (form.value.imageUrl && form.value.imageUrl.startsWith('http')) {
-            <img [src]="form.value.imageUrl" alt="Vista previa"
-              style="margin-top:8px;width:100%;height:120px;object-fit:cover;border-radius:8px" />
+          @if (hasCoverPreview()) {
+            <div class="cover-preview">
+              <img [src]="form.value.imageUrl" alt="Portada del catálogo" class="cover-preview__img" />
+              <div class="cover-preview__actions">
+                <button type="button" class="btn btn--ghost btn--sm" (click)="openImagePicker()">Cambiar imagen</button>
+                <button type="button" class="btn btn--ghost btn--sm" (click)="clearCoverImage()">Quitar</button>
+              </div>
+            </div>
+          } @else {
+            <button type="button" class="btn btn--ghost cover-picker-btn" (click)="openImagePicker()">
+              🖼️ Seleccionar desde Multimedia
+            </button>
+            <span class="form-hint">Elige una imagen de la galería o sube una nueva.</span>
           }
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Estado</label>
-            <select formControlName="status" class="form-select">
-              @for (status of statusOptions; track status.value) {
-                <option [value]="status.value">{{ status.label }}</option>
+            <select formControlName="estado" class="form-select">
+              @for (estado of estadoOptions; track estado.value) {
+                <option [value]="estado.value">{{ estado.label }}</option>
               }
             </select>
           </div>
@@ -90,27 +92,56 @@
       </form>
     </section>
 
-    <section class="card card--soft">
+    <section class="card">
       <div class="card__header card__header--compact">
         <div>
-          <h3 class="card__title">Vista rápida</h3>
-          <p class="card__subtitle">Resumen del estado actual.</p>
+          <h3 class="card__title">Subcategorías</h3>
+          <p class="card__subtitle">Organiza el contenido del catálogo en subcategorías.</p>
         </div>
+        <button type="button" class="btn btn--ghost btn--sm" (click)="addSubCategory()">+ Agregar</button>
       </div>
-      <div class="preview-list">
-        <div class="preview-item">
-          <span class="preview-item__label">Slug</span>
-          <code class="slug-chip">{{ form.value.slug || 'sin-definir' }}</code>
-        </div>
-        <div class="preview-item">
-          <span class="preview-item__label">Visibilidad</span>
-          <span class="preview-item__value">{{ visibilityLabel(form.value.visibility || 'public') }}</span>
-        </div>
+
+      <div class="form-stack" formArrayName="subCategories">
+        @if (subCategoriesForm.length === 0) {
+          <p class="subcats-empty">No hay subcategorías. Usa «Agregar» para crear una.</p>
+        }
+
+        @for (subGroup of subCategoriesForm.controls; track $index; let i = $index) {
+          <div class="subcat-card" [formGroupName]="i">
+            <div class="subcat-card__header">
+              <span class="subcat-card__index">Subcategoría {{ i + 1 }}</span>
+              <button type="button" class="subcat-card__remove" (click)="removeSubCategory(i)" title="Eliminar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="form-group" [class.form-group--error]="subFieldError(i, 'name', 'required')">
+              <label class="form-label">Nombre <span class="required">*</span></label>
+              <input type="text" formControlName="name" class="form-input" placeholder="Ej. Consulta prenatal" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Descripción</label>
+              <textarea formControlName="description" rows="2" class="form-textarea"
+                placeholder="Describe esta subcategoría..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Estado</label>
+              <select formControlName="estado" class="form-select">
+                @for (estado of estadoOptions; track estado.value) {
+                  <option [value]="estado.value">{{ estado.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        }
       </div>
     </section>
   </aside>
 
-  <!-- Artículos de esta categoría -->
   @if (mode() === 'edit') {
     <section class="editor-main">
       <section class="card">
@@ -174,3 +205,10 @@
     </section>
   }
 </div>
+
+@if (showImagePicker()) {
+  <app-image-picker
+    (imageSelected)="onImageSelected($event)"
+    (closed)="showImagePicker.set(false)"
+  />
+}

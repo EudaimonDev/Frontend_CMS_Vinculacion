@@ -4,10 +4,11 @@ import { Router, RouterLink } from '@angular/router';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge';
-import { Catalog, CatalogStatus, CatalogTheme, CatalogVisibility } from '../models/catalog.model';
+import { Catalog, CatalogEstado, CatalogTheme, CatalogVisibility } from '../models/catalog.model';
 import { CatalogsService } from '../services/catalogs.service';
+import { BadgeStatus } from '../../shared/components/status-badge/status-badge';
 
-type CatalogFilter = 'all' | CatalogStatus;
+type CatalogFilter = 'all' | CatalogEstado;
 
 interface FilterOption {
   value: CatalogFilter;
@@ -39,19 +40,19 @@ export class CatalogsListComponent {
     return [
       { value: 'all', label: 'Todos', count: catalogs.length },
       {
-        value: 'active',
-        label: 'Activos',
-        count: catalogs.filter((catalog) => catalog.status === 'active').length,
+        value: 'publicado',
+        label: 'Publicados',
+        count: catalogs.filter((catalog) => catalog.estado === 'publicado').length,
       },
       {
-        value: 'draft',
+        value: 'borrador',
         label: 'Borradores',
-        count: catalogs.filter((catalog) => catalog.status === 'draft').length,
+        count: catalogs.filter((catalog) => catalog.estado === 'borrador').length,
       },
       {
-        value: 'archived',
+        value: 'archivado',
         label: 'Archivados',
-        count: catalogs.filter((catalog) => catalog.status === 'archived').length,
+        count: catalogs.filter((catalog) => catalog.estado === 'archivado').length,
       },
     ];
   });
@@ -61,7 +62,7 @@ export class CatalogsListComponent {
     const filter = this.statusFilter();
 
     return this.catalogs().filter((catalog) => {
-      const matchesFilter = filter === 'all' || catalog.status === filter;
+      const matchesFilter = filter === 'all' || catalog.estado === filter;
       const matchesQuery =
         !query ||
         catalog.name.toLowerCase().includes(query) ||
@@ -136,5 +137,11 @@ export class CatalogsListComponent {
     const base = catalog.itemLabel.toLowerCase();
     const suffix = count === 1 ? '' : 's';
     return `${count} ${base}${suffix}`;
+  }
+
+  estadoBadge(estado: CatalogEstado): BadgeStatus {
+    if (estado === 'publicado') return 'published';
+    if (estado === 'archivado') return 'archived';
+    return 'draft';
   }
 }

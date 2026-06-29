@@ -1,6 +1,14 @@
 import { Injectable, computed, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Catalog, CatalogFormData, CatalogItem } from '../models/catalog.model';
+import {
+  Catalog,
+  CatalogEstado,
+  CatalogFormData,
+  CatalogItem,
+  mapEstadoFromApi,
+  mapEstadoToApi,
+  SubCategory,
+} from '../models/catalog.model';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -16,7 +24,7 @@ export class CatalogsService {
     const items = catalogs.flatMap(c => c.items);
     return {
       totalCatalogs: catalogs.length,
-      activeCatalogs: catalogs.filter(c => c.status === 'active').length,
+      activeCatalogs: catalogs.filter(c => c.estado === 'publicado').length,
       totalItems: items.length,
       featuredItems: items.filter(i => i.featured).length
     };
@@ -26,59 +34,30 @@ export class CatalogsService {
     this.loadAll();
   }
 
-  private loadAll(): void {
+  loadAll(): void {
     this.http
       .get<any[]>(`${this.api}/Categories/admin`)
       .subscribe(categories => {
-        this._catalogs.set(categories.map(this.mapCategoryToCatalog));
+        this._catalogs.set(categories.map(c => this.mapCategoryToCatalog(c)));
       });
+  }
+
+  getByIdFromApi(id: string) {
+    return this.http.get<any>(`${this.api}/Categories/admin/${id}`);
   }
 
   getById(id: string) {
     return computed(() => this._catalogs().find(c => c.id === id) ?? null);
   }
 
-  create(data: CatalogFormData, items: CatalogItem[] = []): Catalog {
-    const body = {
-      name: data.name,
-      slug: data.slug,
-      description: data.description,
-      isPublicVisible: data.visibility === 'public',
-      imageUrl: data.imageUrl ?? null
-    };
-
-    const temp: Catalog = {
-      id: Date.now().toString(),
-      ...data,
-      items,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-
-    this.http.post<any>(`${this.api}/Categories/admin`, body).subscribe(cat => {
-      this._catalogs.update(cs => [this.mapCategoryToCatalog(cat), ...cs]);
-    });
-
-    return temp;
+  create(data: CatalogFormData) {
+    const body = this.toApiBody(data);
+    return this.http.post<any>(`${this.api}/Categories/admin`, body);
   }
 
-  update(id: string, data: Partial<CatalogFormData>): void {
-    const current = this._catalogs().find(c => c.id === id);
-    if (!current) return;
-
-    const body = {
-      name: data.name ?? current.name,
-      slug: data.slug ?? current.slug,
-      description: data.description ?? current.description,
-      imageUrl: data.imageUrl ?? null,
-      isPublicVisible: (data.visibility ?? current.visibility) === 'public'
-    };
-
-    this.http.put(`${this.api}/Categories/admin/${id}`, body).subscribe(() => {
-      this._catalogs.update(cs =>
-        cs.map(c => c.id === id ? { ...c, ...data, updatedAt: new Date() } : c)
-      );
-    });
+  update(id: string, data: CatalogFormData) {
+    const body = this.toApiBody(data);
+    return this.http.put<any>(`${this.api}/Categories/admin/${id}`, body);
   }
 
   replaceItems(id: string, items: CatalogItem[]): void {
@@ -93,28 +72,22 @@ export class CatalogsService {
 
     const body = {
       name: `${source.name} (copia)`,
-      slug: `${source.slug}-copia`,
       description: source.description,
-      isPublicVisible: source.visibility === 'public'
-    };
-
-    const now = new Date();
-    const duplicated: Catalog = {
-      ...source,
-      id: Date.now().toString(),
-      name: `${source.name} (copia)`,
-      slug: `${source.slug}-copia`,
-      status: 'draft',
-      items: [],
-      createdAt: now,
-      updatedAt: now
+      isPublicVisible: source.visibility === 'public',
+      estado: mapEstadoToApi('borrador'),
+      imageUrl: source.imageUrl ?? null,
+      subCategories: source.subCategories.map(sub => ({
+        name: sub.name,
+        description: sub.description,
+        estado: mapEstadoToApi(sub.estado),
+      })),
     };
 
     this.http.post<any>(`${this.api}/Categories/admin`, body).subscribe(cat => {
       this._catalogs.update(cs => [this.mapCategoryToCatalog(cat), ...cs]);
     });
 
-    return duplicated;
+    return null;
   }
 
   delete(id: string): void {
@@ -134,20 +107,51 @@ export class CatalogsService {
       .replace(/-+/g, '-') || 'nuevo-elemento';
   }
 
-  private mapCategoryToCatalog(cat: any): Catalog {
+  private toApiBody(data: CatalogFormData) {
+    return {
+      name: data.name,
+      description: data.description,
+      isPublicVisible: data.visibility === 'public',
+      estado: mapEstadoToApi(data.estado),
+      imageUrl: data.imageUrl ?? null,
+      subCategories: (data.subCategories ?? [])
+        .filter(sub => sub.name?.trim())
+        .map(sub => ({
+          subCategoryId: sub.subCategoryId ?? null,
+          name: sub.name.trim(),
+          description: sub.description?.trim() || null,
+          estado: mapEstadoToApi(sub.estado),
+        })),
+    };
+  }
+
+  mapCategoryToCatalog(cat: any): Catalog {
     return {
       id: cat.categoryId.toString(),
       name: cat.name,
       slug: cat.slug,
       description: cat.description ?? '',
-      status: cat.isPublicVisible ? 'active' : 'draft',
+      estado: mapEstadoFromApi(cat.estado),
       visibility: cat.isPublicVisible ? 'public' : 'private',
       theme: 'blue',
       itemLabel: 'Artículo',
       items: Array(cat.articleCount ?? 0).fill({}),
+      subCategories: (cat.subCategories ?? []).map((sub: any) => this.mapSubCategory(sub)),
       imageUrl: cat.imageUrl ?? undefined,
+      isActive: cat.isActive ?? true,
       createdAt: new Date(),
       updatedAt: new Date()
+    };
+  }
+
+  mapSubCategory(sub: any): SubCategory {
+    return {
+      subCategoryId: sub.subCategoryId,
+      name: sub.name ?? '',
+      description: sub.description ?? '',
+      estado: mapEstadoFromApi(sub.estado),
+      slug: sub.slug,
+      isActive: sub.isActive,
     };
   }
 }
